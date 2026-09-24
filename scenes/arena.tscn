@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://jqvpjvgqg6w5"]
 
 [ext_resource type="PackedScene" uid="uid://x0pv8aasw4v8" path="res://scenes/player.tscn" id="1_e05a3"]
+[ext_resource type="Script" uid="uid://ctiysp7ucfs57" path="res://scripts/arena.gd" id="1_olpmc"]
+[ext_resource type="PackedScene" uid="uid://lrlmfejpbkt7" path="res://scenes/enemy_npc.tscn" id="2_wl4x5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x2ntn"]
 size = Vector2(651, 20.5)
@@ -14,7 +16,12 @@ size = Vector2(1148, 17)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_444vf"]
 size = Vector2(1148, 17)
 
+[sub_resource type="Environment" id="Environment_eo7yt"]
+background_mode = 3
+glow_enabled = true
+
 [node name="Arena" type="Node2D" unique_id=635482318]
+script = ExtResource("1_olpmc")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1469901882]
 offset_right = 1152.0
@@ -43,4 +50,10 @@ position = Vector2(259, -158)
 shape = SubResource("RectangleShape2D_444vf")
 
 [node name="Player" parent="." unique_id=360769071 instance=ExtResource("1_e05a3")]
-position = Vector2(568, 300)
+position = Vector2(415, 319)
+
+[node name="EnemyNPC" parent="." unique_id=1502939056 instance=ExtResource("2_wl4x5")]
+position = Vector2(689, 322)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=671403823]
+environment = SubResource("Environment_eo7yt")

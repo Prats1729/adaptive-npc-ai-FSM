@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://lrlmfejpbkt7"]
+
+[ext_resource type="Script" uid="uid://c51rtcufu8iur" path="res://scripts/enemy_npc.gd" id="1_n6ve1"]
+[ext_resource type="Script" uid="uid://brg1jkyxxorjo" path="res://scripts/enemy_fsm.gd" id="2_phado"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x2ntn"]
+size = Vector2(32, 32)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4ag8t"]
+bg_color = Color(0.87350816, 0.00074518437, 0.14386079, 1)
+
+[node name="EnemyNPC" type="CharacterBody2D" unique_id=1502939056]
+script = ExtResource("1_n6ve1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1540427907]
+shape = SubResource("RectangleShape2D_x2ntn")
+
+[node name="Node" type="Node" parent="." unique_id=100715776]
+script = ExtResource("2_phado")
+
+[node name="StateLabel" type="Label" parent="." unique_id=1712403922]
+offset_left = -100.0
+offset_top = -60.0
+offset_right = 100.0
+offset_bottom = -37.0
+text = "Current State"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=597989818]
+offset_left = -20.0
+offset_top = 20.0
+offset_right = 20.0
+offset_bottom = 30.0
+theme_override_styles/fill = SubResource("StyleBoxFlat_4ag8t")
+show_percentage = false
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1874193074]
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+color = Color(1.1595734, 0, 0.28538418, 1)
