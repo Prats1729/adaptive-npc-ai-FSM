@@ -53,7 +53,7 @@ shape = SubResource("RectangleShape2D_444vf")
 position = Vector2(415, 319)
 
 [node name="EnemyNPC" parent="." unique_id=1502939056 instance=ExtResource("2_wl4x5")]
-position = Vector2(689, 322)
+position = Vector2(817, 313)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=671403823]
 environment = SubResource("Environment_eo7yt")
