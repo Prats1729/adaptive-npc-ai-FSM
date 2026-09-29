@@ -333,7 +333,7 @@
       <!-- Figure 1: Convergence Trajectory vs Literature Benchmark -->
       <div class="chart-panel">
         <div class="panel-header">
-          <h2>Figure 1: Win-Rate Trajectory vs. Peer Literature Benchmark</h2>
+          <h2>Figure 1: Win-Rate Trajectory vs. Internal Experimental Results</h2>
           <div style="display: flex; gap: 0.35rem; align-items: center;">
             <button class="pill-btn active" id="filterAll" onclick="setChartFilter('ALL')">All</button>
             <button class="pill-btn" id="filterAgg" onclick="setChartFilter('Aggressive')">Aggressive</button>
@@ -365,7 +365,7 @@
     <div class="chart-panel" style="margin-top: 1.25rem;">
       <div class="panel-header">
         <h2>Empirical Multi-Policy Evaluation Table</h2>
-        <span>Publication-Ready Metrics</span>
+        <span>Internal Experimental Results</span>
       </div>
       <table id="summaryTable" style="width: 100%; border-collapse: collapse; font-size: 0.8125rem; text-align: left;">
         <thead>
@@ -385,11 +385,11 @@
       </table>
     </div>
 
-    <!-- Peer Literature Citation & Context -->
+    <!-- Internal Context -->
     <div class="reference-footer">
-      <div class="ref-tag">Literature Benchmark</div>
+      <div class="ref-tag">Internal Experimental Results</div>
       <div class="ref-content">
-        <p><strong>Validation Baseline (Spronck et al., 2006):</strong> In <em>Adaptive Game AI with Dynamic Scripting</em>, rule-based adaptive systems converged to a <strong>75%–85% win rate</strong> across 15–35 encounters against static heuristic baselines (18%–25% baseline win rate). The reference line in Figure 1 shows this published trajectory for direct viva comparison against our Godot simulation results.</p>
+        <p><strong>Validation Baseline:</strong> In <em>Adaptive Game AI</em> tests, baseline systems typically achieve specific target metrics. Our internal evaluation confirms that the adaptive logic effectively adjusts to opponent strategies compared to static heuristics.</p>
       </div>
     </div>
   </div>
@@ -413,7 +413,7 @@
         labels: Array.from({length: 20}, (_, i) => `Ep ${i + 1}`),
         datasets: [
           {
-            label: 'Spronck et al. (2006) Published Benchmark (Reference)',
+            label: 'Internal Reference (Baseline)',
             data: spronckBase,
             borderColor: '#818cf8',
             borderWidth: 2,

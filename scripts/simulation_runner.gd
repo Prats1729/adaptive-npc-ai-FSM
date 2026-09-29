@@ -28,6 +28,8 @@ var episode_elapsed_time: float = 0.0
 var npc_hits_taken: int = 0
 var player_hits_taken: int = 0
 var state_transition_count: int = 0
+var response_time_sum: float = 0.0
+var response_time_count: int = 0
 var is_episode_active: bool = false
 
 # Batch Benchmark State
@@ -66,9 +68,16 @@ func _initialize_references() -> void:
 		player_bot = player.get_node_or_null("PlayerBot")
 		if not player.player_died.is_connected(_on_player_died):
 			player.player_died.connect(_on_player_died)
+		if not player.player_damaged.is_connected(_on_player_damaged):
+			player.player_damaged.connect(_on_player_damaged)
 	
 	if enemy and not enemy.enemy_died.is_connected(_on_enemy_died):
 		enemy.enemy_died.connect(_on_enemy_died)
+	if enemy and not enemy.enemy_damaged.is_connected(_on_enemy_damaged):
+		enemy.enemy_damaged.connect(_on_enemy_damaged)
+	
+	if fsm and fsm.has_signal("response_time_measured") and not fsm.response_time_measured.is_connected(_on_response_time_measured):
+		fsm.response_time_measured.connect(_on_response_time_measured)
 	
 	csv_logger = get_node_or_null("CSVLogger")
 	if not csv_logger:
@@ -96,6 +105,8 @@ func start_single_episode() -> void:
 	npc_hits_taken = 0
 	player_hits_taken = 0
 	state_transition_count = 0
+	response_time_sum = 0.0
+	response_time_count = 0
 	current_episode_id += 1
 
 func start_automated_benchmark(batch_size: int = 10, bot_mode: int = 1) -> void:
@@ -180,6 +191,11 @@ func _run_next_batch_episode() -> void:
 		var adaptive_logic = fsm.get_node("AdaptiveLogic")
 		adaptive_logic.is_adaptive_enabled = use_adaptive
 	
+	# PAIR-MATCHED SEED FOR REPRODUCIBILITY
+	# Ensure Basic and Adaptive face the exact same spawn variations and random rolls
+	var trial_number = batch_current_index if not use_adaptive else (batch_current_index - batch_target_episodes / 2)
+	seed(batch_bot_mode * 1000 + trial_number)
+	
 	# Reset arena entities with slight spawn variation
 	if arena and arena.has_method("reset_simulation"):
 		arena.reset_simulation(true)
@@ -201,6 +217,19 @@ func _on_enemy_died() -> void:
 	if is_episode_active:
 		_conclude_episode(false, true, "Enemy defeated")
 
+func _on_player_damaged() -> void:
+	if is_episode_active:
+		player_hits_taken += 1
+
+func _on_enemy_damaged() -> void:
+	if is_episode_active:
+		npc_hits_taken += 1
+
+func _on_response_time_measured(time_sec: float) -> void:
+	if is_episode_active:
+		response_time_sum += time_sec
+		response_time_count += 1
+
 func _conclude_episode(npc_won: bool, player_won: bool, outcome_reason: String) -> void:
 	is_episode_active = false
 	
@@ -211,18 +240,28 @@ func _conclude_episode(npc_won: bool, player_won: bool, outcome_reason: String) 
 	var final_retreat = fsm.flee_health_ratio if fsm else 0.30
 	var final_detection = fsm.detection_range if fsm else 220.0
 	
+	var final_npc_survival = max_episode_duration if npc_won else episode_elapsed_time
+	var final_player_survival = max_episode_duration if player_won else episode_elapsed_time
+	if not npc_won and not player_won:
+		final_npc_survival = max_episode_duration
+		final_player_survival = max_episode_duration
+
+	var avg_resp = 0.016
+	if response_time_count > 0:
+		avg_resp = response_time_sum / float(response_time_count)
+	
 	var episode_data = {
 		"episode_id": current_episode_id,
 		"system_type": system_type,
 		"player_bot_type": bot_type_str,
-		"npc_survival_time": episode_elapsed_time,
-		"player_survival_time": episode_elapsed_time,
+		"npc_survival_time": final_npc_survival,
+		"player_survival_time": final_player_survival,
 		"npc_won": npc_won,
 		"player_won": player_won,
 		"npc_hits": player_hits_taken,
 		"player_hits": npc_hits_taken,
 		"state_transition_count": state_transition_count,
-		"average_response_time": 0.016,
+		"average_response_time": avg_resp,
 		"final_adaptive_retreat_threshold": final_retreat,
 		"final_adaptive_detection_range": final_detection
 	}

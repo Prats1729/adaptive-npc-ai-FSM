@@ -10,6 +10,7 @@ extends CharacterBody2D
 
 signal health_changed(current_health: int, max_health: int)
 signal player_attacked()
+signal player_damaged()
 signal player_died()
 
 @export var walk_speed: float = 155.0
@@ -122,6 +123,9 @@ func take_damage(amount: int) -> void:
 		return
 	
 	current_health = max(0, current_health - amount)
+	if amount > 0:
+		player_damaged.emit()
+		
 	if hp_bar:
 		hp_bar.value = current_health
 	

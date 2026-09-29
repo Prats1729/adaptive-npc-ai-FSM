@@ -9,6 +9,7 @@ extends CharacterBody2D
 # ==============================================================================
 
 signal health_changed(current_health: int, max_health: int)
+signal enemy_damaged()
 signal enemy_died()
 
 @export var max_health: int = 200
@@ -73,6 +74,8 @@ func take_damage(amount: int) -> void:
 		return
 	
 	current_health = max(0, current_health - amount)
+	if amount > 0:
+		enemy_damaged.emit()
 	if hp_bar:
 		hp_bar.value = current_health
 	

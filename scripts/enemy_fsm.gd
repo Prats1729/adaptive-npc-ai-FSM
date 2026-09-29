@@ -45,6 +45,7 @@ var hit_and_run_timer: float = 0.0
 var hit_and_run_active: bool = false
 
 var idle_recovery_timer: float = 0.0
+var last_stimulus_usec: int = 0
 
 @onready var adaptive_logic: Node = $AdaptiveLogic if has_node("AdaptiveLogic") else null
 
@@ -149,6 +150,8 @@ func _process_idle_state(distance: float) -> void:
 	
 	# Transition 1: Player enters detection range
 	if distance <= detection_range:
+		if last_stimulus_usec == 0:
+			notify_stimulus_received()
 		var extra_info = ""
 		if adaptive_logic and adaptive_logic.is_adaptive_enabled and detection_range > adaptive_logic.BASE_DETECTION_RANGE + 4.0:
 			extra_info = " [Adaptive Expansion: %dpx > base %dpx]" % [round(detection_range), round(adaptive_logic.BASE_DETECTION_RANGE)]
@@ -322,6 +325,13 @@ func change_state(new_state: State, reason: String) -> void:
 	if current_state == new_state:
 		return
 	
+	if last_stimulus_usec > 0:
+		var response_time_sec = (Time.get_ticks_usec() - last_stimulus_usec) / 1000000.0
+		if response_time_sec <= 0.0001:
+			response_time_sec = get_physics_process_delta_time()
+		response_time_measured.emit(response_time_sec)
+		last_stimulus_usec = 0
+	
 	var old_state_name = get_state_name(current_state)
 	var new_state_name = get_state_name(new_state)
 	last_reason = reason
@@ -376,7 +386,12 @@ func emit_telemetry(distance: float, health_ratio: float) -> void:
 	}
 	telemetry_updated.emit(data)
 
+func notify_stimulus_received() -> void:
+	if last_stimulus_usec == 0:
+		last_stimulus_usec = Time.get_ticks_usec()
+
 func notify_player_attacked() -> void:
+	notify_stimulus_received()
 	if adaptive_logic and adaptive_logic.has_method("record_player_attack"):
 		adaptive_logic.record_player_attack()
 

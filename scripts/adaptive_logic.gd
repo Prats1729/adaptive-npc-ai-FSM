@@ -33,7 +33,6 @@ const BASE_ATTACK_COOLDOWN: float = 0.80
 # Adaptive Limits (conservative — strategy matters more than numbers)
 const MAX_ADAPTIVE_DETECTION: float = 260.0
 const MAX_ADAPTIVE_FLEE_THRESHOLD: float = 0.38
-const MIN_ADAPTIVE_COOLDOWN: float = 0.65
 
 var fsm: Node = null
 var enemy: CharacterBody2D = null
@@ -91,13 +90,8 @@ func _physics_process(delta: float) -> void:
 	else:
 		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, BASE_FLEE_THRESHOLD, delta * 1.5)
 	
-	# Rule 2: High Aggression -> Reduce attack cooldown to exploit timing gaps
-	# This is the key adaptive DPS advantage: 0.80 -> 0.65s = ~23% faster attacks
-	if player_aggression_score > 0.30:
-		var cd_boost = lerp(BASE_ATTACK_COOLDOWN, MIN_ADAPTIVE_COOLDOWN, min(1.0, (player_aggression_score - 0.30) * 1.5))
-		fsm.attack_cooldown_time = lerp(fsm.attack_cooldown_time, cd_boost, delta * 2.5)
-	else:
-		fsm.attack_cooldown_time = lerp(fsm.attack_cooldown_time, BASE_ATTACK_COOLDOWN, delta * 1.5)
+	# Removed Rule 2 (adaptive attack cooldown) to ensure fair combat metrics.
+	fsm.attack_cooldown_time = BASE_ATTACK_COOLDOWN
 	
 	# Rule 3: Passive / Distant Player -> Expand detection range
 	if passive_distance_timer > 2.5:
@@ -108,16 +102,16 @@ func _physics_process(delta: float) -> void:
 	
 	# Dynamic explanation synthesis
 	if player_aggression_score > 0.5:
-		current_adaptive_explanation = "Adaptive: High aggression (%.2f) -> Flee at %.0f%%, Cooldown %.2fs, Hit-and-Run active" % [
-			player_aggression_score, fsm.flee_health_ratio * 100.0, fsm.attack_cooldown_time
+		current_adaptive_explanation = "Adaptive: High aggression (%.2f) -> Flee at %.0f%%, Hit-and-Run active" % [
+			player_aggression_score, fsm.flee_health_ratio * 100.0
 		]
 	elif passive_distance_timer > 3.0 and fsm.detection_range > BASE_DETECTION_RANGE + 3.0:
 		current_adaptive_explanation = "Adaptive: Target passive for %.1fs -> Detection expanded to %dpx" % [
 			passive_distance_timer, round(fsm.detection_range)
 		]
 	else:
-		current_adaptive_explanation = "Adaptive: Scanning (Aggression: %.2f, Range: %dpx, CD: %.2fs)" % [
-			player_aggression_score, round(fsm.detection_range), fsm.attack_cooldown_time
+		current_adaptive_explanation = "Adaptive: Scanning (Aggression: %.2f, Range: %dpx)" % [
+			player_aggression_score, round(fsm.detection_range)
 		]
 	
 	var aggression_tier = get_aggression_tier()
