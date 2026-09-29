@@ -1,20 +1,24 @@
 [gd_scene format=3 uid="uid://jqvpjvgqg6w5"]
 
 [ext_resource type="Script" uid="uid://ctiysp7ucfs57" path="res://scripts/arena.gd" id="1_olpmc"]
-[ext_resource type="PackedScene" uid="uid://x0pv8aasw4v8" path="res://scenes/player.tscn" id="1_e05a3"]
-[ext_resource type="PackedScene" uid="uid://lrlmfejpbkt7" path="res://scenes/enemy_npc.tscn" id="2_wl4x5"]
+[ext_resource type="Script" uid="uid://bv8w7v2w86l1q" path="res://scripts/arena_map.gd" id="2_arena_map"]
+[ext_resource type="PackedScene" uid="uid://x0pv8aasw4v8" path="res://scenes/player.tscn" id="3_e05a3"]
+[ext_resource type="PackedScene" uid="uid://lrlmfejpbkt7" path="res://scenes/enemy_npc.tscn" id="4_wl4x5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_top"]
-size = Vector2(1152, 20)
+size = Vector2(1100, 20)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bottom"]
-size = Vector2(1152, 20)
+size = Vector2(1100, 20)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
-size = Vector2(20, 648)
+size = Vector2(20, 430)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_right"]
-size = Vector2(20, 648)
+size = Vector2(20, 430)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pillar"]
+radius = 24.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.0980392, 0.113725, 0.156863, 0.88)
@@ -56,41 +60,53 @@ glow_enabled = true
 [node name="Arena" type="Node2D" unique_id=635482318]
 script = ExtResource("1_olpmc")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1469901882]
+[node name="Background" type="ColorRect" parent="." unique_id=1469901882]
 offset_right = 1152.0
 offset_bottom = 648.0
-color = Color(0.12549, 0.141176, 0.188235, 1)
+color = Color(0.08, 0.09, 0.12, 1)
 
-[node name="FloorGrid" type="ColorRect" parent="." unique_id=1469901883]
-offset_left = 20.0
-offset_top = 130.0
-offset_right = 1132.0
-offset_bottom = 530.0
-color = Color(0.160784, 0.180392, 0.235294, 0.6)
+[node name="ArenaMap" type="Node2D" parent="." unique_id=1469901883]
+script = ExtResource("2_arena_map")
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1800397950]
 
 [node name="TopWall" type="CollisionShape2D" parent="Walls" unique_id=2112086403]
-position = Vector2(576, 120)
+position = Vector2(576, 110)
 shape = SubResource("RectangleShape2D_top")
 
 [node name="BottomWall" type="CollisionShape2D" parent="Walls" unique_id=227861339]
-position = Vector2(576, 540)
+position = Vector2(576, 550)
 shape = SubResource("RectangleShape2D_bottom")
 
 [node name="LeftWall" type="CollisionShape2D" parent="Walls" unique_id=1393362298]
-position = Vector2(10, 330)
+position = Vector2(20, 330)
 shape = SubResource("RectangleShape2D_left")
 
 [node name="RightWall" type="CollisionShape2D" parent="Walls" unique_id=1676785476]
-position = Vector2(1142, 330)
+position = Vector2(1132, 330)
 shape = SubResource("RectangleShape2D_right")
 
-[node name="Player" parent="." unique_id=360769071 instance=ExtResource("1_e05a3")]
-position = Vector2(340, 330)
+[node name="PillarTopLeft" type="CollisionShape2D" parent="Walls" unique_id=101010101]
+position = Vector2(440, 240)
+shape = SubResource("CircleShape2D_pillar")
 
-[node name="EnemyNPC" parent="." unique_id=1502939056 instance=ExtResource("2_wl4x5")]
-position = Vector2(810, 330)
+[node name="PillarTopRight" type="CollisionShape2D" parent="Walls" unique_id=101010102]
+position = Vector2(712, 240)
+shape = SubResource("CircleShape2D_pillar")
+
+[node name="PillarBottomLeft" type="CollisionShape2D" parent="Walls" unique_id=101010103]
+position = Vector2(440, 420)
+shape = SubResource("CircleShape2D_pillar")
+
+[node name="PillarBottomRight" type="CollisionShape2D" parent="Walls" unique_id=101010104]
+position = Vector2(712, 420)
+shape = SubResource("CircleShape2D_pillar")
+
+[node name="Player" parent="." unique_id=360769071 instance=ExtResource("3_e05a3")]
+position = Vector2(260, 330)
+
+[node name="EnemyNPC" parent="." unique_id=1502939056 instance=ExtResource("4_wl4x5")]
+position = Vector2(890, 330)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=671403823]
 environment = SubResource("Environment_eo7yt")
@@ -129,7 +145,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
 theme_override_font_sizes/font_size = 13
-text = "[R] Reset Simulation | [1] Test Damage NPC | [2] Test Damage Player"
+text = "[R] Reset | [Z] Toggle Perception Rings | [1] Test Damage NPC | [2] Test Damage Player"
 
 [node name="TopSection" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer" unique_id=987654328]
 layout_mode = 2
@@ -155,7 +171,7 @@ text = "NPC STATE: IDLE"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.88, 0.95, 1)
 theme_override_font_sizes/font_size = 12
-text = "Decision Reason: System initialized in default IDLE state."
+text = "Decision Reason: Arena map loaded. NPC in default IDLE state."
 autowrap_mode = 2
 
 [node name="Metrics" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox" unique_id=987654333]
@@ -171,7 +187,7 @@ text = "Distance: "
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
 theme_override_font_sizes/font_size = 11
-text = "470 px (Detect: 220 px | Atk: 60 px)"
+text = "630 px (Detect: 220 px | Atk: 65 px)"
 
 [node name="Sep" type="VSeparator" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/Metrics" unique_id=987654336]
 layout_mode = 2
@@ -243,7 +259,7 @@ layout_mode = 2
 theme_override_font_sizes/normal_font_size = 11
 theme_override_font_sizes/bold_font_size = 11
 bbcode_enabled = true
-text = "[b][00:00][/b] Simulation Initialized."
+text = "[b][00:00][/b] Arena map loaded."
 scroll_following = true
 
 [node name="ControlsFooter" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer/BottomSection" unique_id=987654349]
@@ -254,4 +270,4 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
 theme_override_font_sizes/font_size = 11
-text = "Controls: [W/A/S/D / Arrows] Move  |  [Shift] Sprint  |  [Space / Left Click] Attack  |  [1] Damage NPC (-25)  |  [2] Damage Player (-20)  |  [R] Reset"
+text = "Controls: [W/A/S/D / Arrows] Move  |  [Shift] Sprint  |  [Space / Left Click] Attack  |  [Z] Toggle Perception Rings  |  [1] Damage NPC  |  [2] Damage Player  |  [R] Reset"

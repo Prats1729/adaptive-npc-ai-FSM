@@ -9,7 +9,8 @@ extends Node2D
 
 @onready var player: CharacterBody2D = $Player
 @onready var enemy: CharacterBody2D = $EnemyNPC
-@onready var fsm: Node = $EnemyNPC/EnemyFSM if has_node("EnemyNPC/EnemyFSM") else ($EnemyNPC/Node if has_node("EnemyNPC/Node") else null)
+@onready var fsm: Node = $EnemyNPC/EnemyFSM if has_node("EnemyNPC/EnemyFSM") else null
+@onready var arena_map: Node2D = $ArenaMap if has_node("ArenaMap") else null
 
 # HUD UI References (CanvasLayer)
 @onready var state_badge: Label = $HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/StateBadge if has_node("HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/StateBadge") else null
@@ -24,8 +25,8 @@ extends Node2D
 
 @onready var log_text_edit: RichTextLabel = $HUD/MarginContainer/VBoxContainer/BottomSection/LogPanel/LogContent if has_node("HUD/MarginContainer/VBoxContainer/BottomSection/LogPanel/LogContent") else null
 
-var player_start_pos: Vector2 = Vector2.ZERO
-var enemy_start_pos: Vector2 = Vector2.ZERO
+var player_start_pos: Vector2 = Vector2(260, 330)
+var enemy_start_pos: Vector2 = Vector2(890, 330)
 var simulation_time: float = 0.0
 var log_history: Array[String] = []
 
@@ -42,7 +43,7 @@ func _ready() -> void:
 		fsm.state_changed.connect(_on_fsm_state_changed)
 		fsm.telemetry_updated.connect(_on_fsm_telemetry_updated)
 	
-	_add_log_entry("Simulation initialized. NPC in default [IDLE] state.")
+	_add_log_entry("Arena map loaded. NPC in default [IDLE] state.")
 	_update_vitals_ui()
 
 func _process(delta: float) -> void:
@@ -67,6 +68,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if player and is_instance_valid(player):
 			_add_log_entry("[Viva Demo] Applied 20 damage to Player via test trigger.")
 			player.take_damage(20)
+	
+	# Press Z: Toggle Perception Range Overlay
+	elif event.keycode == KEY_Z:
+		if arena_map and "show_perception_zones" in arena_map:
+			arena_map.show_perception_zones = not arena_map.show_perception_zones
+			var status = "ON" if arena_map.show_perception_zones else "OFF"
+			_add_log_entry("[Display] Sensory perception zones toggled " + status)
 
 func reset_simulation() -> void:
 	simulation_time = 0.0
