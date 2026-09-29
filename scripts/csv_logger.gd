@@ -33,6 +33,12 @@ func initialize_csv_header() -> void:
 	write_header(CSV_FILE_PATH)
 	is_header_written = true
 
+func clear_csv() -> void:
+	print("[CSVLogger] Wiping old simulation data for a fresh benchmark run.")
+	write_header(LOCAL_CSV_PATH)
+	write_header(CSV_FILE_PATH)
+	is_header_written = true
+
 func write_header(path: String) -> void:
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if file:

@@ -105,6 +105,8 @@ func start_automated_benchmark(batch_size: int = 10, bot_mode: int = 1) -> void:
 	batch_bot_mode = bot_mode
 	is_benchmark_running = true
 	
+	_reset_benchmark_state()
+	
 	# Accelerate simulation for rapid data collection
 	Engine.time_scale = 2.5
 	
@@ -124,6 +126,8 @@ func start_full_suite_benchmark(episodes_per_policy: int = 50) -> void:
 	current_suite_policy_idx = 0
 	episodes_per_policy_target = episodes_per_policy
 	
+	_reset_benchmark_state()
+	
 	# High speed for large batch collection
 	Engine.time_scale = 6.0
 	
@@ -141,6 +145,16 @@ func start_full_suite_benchmark(episodes_per_policy: int = 50) -> void:
 	print("=======================================================\n")
 	
 	_run_next_batch_episode()
+
+func _reset_benchmark_state() -> void:
+	current_episode_id = 0
+	episode_history.clear()
+	stats = {
+		"basic": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0},
+		"adaptive": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0}
+	}
+	if csv_logger and csv_logger.has_method("clear_csv"):
+		csv_logger.clear_csv()
 
 func _run_next_batch_episode() -> void:
 	if batch_current_index >= batch_target_episodes:
