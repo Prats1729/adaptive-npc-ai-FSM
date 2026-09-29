@@ -23,7 +23,7 @@ enum State {
 
 @export_group("FSM Decision Thresholds")
 @export var detection_range: float = 240.0
-@export var attack_range: float = 65.0
+@export var attack_range: float = 72.0
 @export var safe_distance: float = 260.0
 @export var flee_health_ratio: float = 0.30 # 30% max health
 @export var attack_damage: int = 14
@@ -82,13 +82,21 @@ func _physics_process(delta: float) -> void:
 	emit_telemetry(distance_to_player, health_ratio)
 
 	# Global Transition Rule: Flee when health drops below current flee threshold
+	var wants_to_flee: bool = (health_ratio <= flee_health_ratio)
+	
+	# Adaptive Counter-Offensive: If the opponent has equal or lower health, do NOT run!
+	# Press the attack to execute the weakened target.
+	if adaptive_logic and adaptive_logic.is_adaptive_enabled and enemy.player:
+		if enemy.player.current_health <= enemy.current_health:
+			wants_to_flee = false
+
 	# Prevent thrashing: If already at a safe distance in IDLE, hold position instead of infinite loop
-	if health_ratio <= flee_health_ratio and current_state != State.FLEE and current_state != State.DEAD:
+	if wants_to_flee and current_state != State.FLEE and current_state != State.DEAD:
 		var threat_nearby = (current_state == State.ATTACK or current_state == State.CHASE or distance_to_player < safe_distance)
 		if threat_nearby:
 			var reason_text = ""
 			if adaptive_logic and adaptive_logic.is_adaptive_enabled and flee_health_ratio > adaptive_logic.BASE_FLEE_THRESHOLD + 0.02:
-				reason_text = "Adaptive Early Flee: Aggression HIGH (%.2f) -> Threshold raised to %.0f%% (HP: %d/%d)" % [
+				reason_text = "Adaptive Tactical Retreat: Aggression HIGH (%.2f) -> Threshold raised to %.0f%% (HP: %d/%d)" % [
 					adaptive_logic.player_aggression_score,
 					flee_health_ratio * 100.0,
 					enemy.current_health,
@@ -202,11 +210,8 @@ func _get_enemy_boundary_avoidance() -> Vector2:
 
 func _process_attack_state(distance: float) -> void:
 	if enemy.player:
-		var dir_to_player = enemy.global_position.direction_to(enemy.player.global_position)
-		if distance > attack_range * 0.8:
-			enemy.move_towards_point(enemy.player.global_position, enemy.base_speed * 0.6)
-		elif distance < attack_range * 0.4:
-			enemy.move_towards_point(enemy.global_position - dir_to_player * 50.0, enemy.base_speed * 0.5)
+		if distance > attack_range * 0.75:
+			enemy.move_towards_point(enemy.player.global_position, enemy.base_speed * 0.75)
 		else:
 			enemy.stop_moving(enemy.player.global_position)
 	else:
@@ -226,6 +231,37 @@ func _process_attack_state(distance: float) -> void:
 		)
 
 func _process_flee_state(player_pos: Vector2, distance: float, _health_ratio: float) -> void:
+	# Adaptive Counter-Offensive: If pursuer has lower or equal HP, turn and fight!
+	if adaptive_logic and adaptive_logic.is_adaptive_enabled and enemy.player:
+		if enemy.player.current_health <= enemy.current_health:
+			change_state(
+				State.ATTACK if distance <= attack_range else State.CHASE,
+				"Adaptive Counter-Offensive: Target weakened (Player HP: %d <= NPC HP: %d); turning to engage." % [
+					enemy.player.current_health, enemy.current_health
+				]
+			)
+			return
+
+	# Retaliatory Counter-Strike: If pursuer catches up into melee range, punish them!
+	if distance <= attack_range:
+		if attack_timer <= 0.0:
+			attack_timer = attack_cooldown_time
+			if enemy.has_method("trigger_attack_visual"):
+				enemy.trigger_attack_visual()
+			if enemy.player and enemy.player.has_method("take_damage"):
+				enemy.player.take_damage(attack_damage)
+				last_reason = "Retaliatory Counter-Strike: Punished pursuer on tail (Dist: %dpx)" % round(distance)
+				# Check if this retaliatory strike equalized health or gave us the lead!
+				if adaptive_logic and adaptive_logic.is_adaptive_enabled:
+					if enemy.player.current_health <= enemy.current_health:
+						change_state(
+							State.ATTACK,
+							"Adaptive Counter-Offensive: Tail-strike equalized duel (Player HP: %d <= NPC HP: %d); turning to engage." % [
+								enemy.player.current_health, enemy.current_health
+							]
+						)
+						return
+
 	var flee_direction = (enemy.global_position - player_pos).normalized()
 	var avoid = _get_enemy_boundary_avoidance()
 	

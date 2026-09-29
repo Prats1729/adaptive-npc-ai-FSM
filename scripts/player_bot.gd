@@ -80,7 +80,7 @@ func _process_aggressive_mode(dir_to_enemy: Vector2, distance: float, _delta: fl
 	# Sprint only to close medium distances
 	player.bot_wants_sprint = (distance > 130.0 and distance < 350.0)
 	
-	if distance <= player.attack_range * 1.15:
+	if distance <= player.attack_range:
 		player.perform_attack()
 
 func _process_defensive_mode(dir_to_enemy: Vector2, distance: float, _delta: float) -> void:
@@ -113,7 +113,7 @@ func _process_defensive_mode(dir_to_enemy: Vector2, distance: float, _delta: flo
 			player.bot_move_dir = Vector2(-dir_to_enemy.y, dir_to_enemy.x).normalized()
 	
 	# Counter-attack when enemy is in striking distance
-	if distance <= player.attack_range * 1.15:
+	if distance <= player.attack_range:
 		player.perform_attack()
 
 var random_attack_timer: float = 0.0
@@ -139,7 +139,7 @@ func _process_random_mode(distance: float, delta: float) -> void:
 	player.bot_wants_sprint = (distance > 180.0 and randf() > 0.5)
 	
 	# Attack when close
-	if distance <= player.attack_range * 1.25 and random_attack_timer <= 0.0:
+	if distance <= player.attack_range and random_attack_timer <= 0.0:
 		random_attack_timer = randf_range(0.4, 0.9)
 		player.perform_attack()
 

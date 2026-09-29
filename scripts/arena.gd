@@ -187,7 +187,18 @@ func _update_player_bot_ui() -> void:
 		player_mode_label.text = "Mode: %s [M to cycle]" % mode_name
 		player_mode_label.modulate = Color(0.4, 0.9, 0.5) if player_bot.current_mode == 0 else Color(1.0, 0.75, 0.3)
 
+func update_benchmark_hud(mode_name: String, current_batch: int, total_batch: int, current_ep: int, total_suite: int) -> void:
+	if player_mode_label:
+		player_mode_label.text = "Opponent: %s (%d/%d)" % [mode_name, current_batch, total_batch]
+		player_mode_label.modulate = Color(1.0, 0.65, 0.2)
+	if reason_label:
+		reason_label.text = "[BENCHMARK %d/%d] Active Policy: %s (%d/%d)" % [
+			current_ep, total_suite, mode_name, current_batch, total_batch
+		]
+		reason_label.modulate = Color(0.9, 0.95, 1.0)
+
 func _on_benchmark_completed(summary: Dictionary) -> void:
+	_update_player_bot_ui()
 	if reason_label:
 		reason_label.text = "BENCHMARK COMPLETE: Basic Win: %.0f%% (%.1fs) | Adaptive Win: %.0f%% (%.1fs) [Saved to CSV!]" % [
 			summary.get("basic_win_rate", 0.0),

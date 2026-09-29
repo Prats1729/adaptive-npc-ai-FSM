@@ -170,6 +170,13 @@ func _run_next_batch_episode() -> void:
 	if arena and arena.has_method("reset_simulation"):
 		arena.reset_simulation(true)
 	
+	# Update Arena HUD with active bot policy name and suite progress
+	if arena and arena.has_method("update_benchmark_hud"):
+		var bot_name = player_bot.get_mode_name() if (player_bot and player_bot.has_method("get_mode_name")) else "UNKNOWN"
+		var total_suite_episodes = (suite_policies.size() * episodes_per_policy_target) if is_suite_running else batch_target_episodes
+		var overall_ep_idx = (current_suite_policy_idx * episodes_per_policy_target + batch_current_index) if is_suite_running else batch_current_index
+		arena.update_benchmark_hud(bot_name, batch_current_index, batch_target_episodes, overall_ep_idx, total_suite_episodes)
+	
 	start_single_episode()
 
 func _on_player_died() -> void:
