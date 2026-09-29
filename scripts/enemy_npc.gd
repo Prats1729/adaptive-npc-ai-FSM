@@ -12,8 +12,8 @@ signal health_changed(current_health: int, max_health: int)
 signal enemy_died()
 
 @export var max_health: int = 100
-@export var base_speed: float = 130.0
-@export var flee_speed: float = 185.0
+@export var base_speed: float = 150.0
+@export var flee_speed: float = 210.0
 
 var current_health: int = 100
 var player: Node2D = null
@@ -85,6 +85,14 @@ func take_damage(amount: int) -> void:
 	if current_health <= 0:
 		enemy_died.emit()
 		print("[EnemyNPC] Enemy defeated!")
+
+func heal(amount: int) -> void:
+	if current_health <= 0 or current_health >= max_health:
+		return
+	current_health = min(max_health, current_health + amount)
+	if hp_bar:
+		hp_bar.value = current_health
+	health_changed.emit(current_health, max_health)
 
 func update_visual_state(state_name: String, state_color: Color, _reason: String = "") -> void:
 	if visual and visual.has_method("set_state_tint"):

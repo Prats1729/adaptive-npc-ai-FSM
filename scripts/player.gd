@@ -12,17 +12,22 @@ signal health_changed(current_health: int, max_health: int)
 signal player_attacked()
 signal player_died()
 
-@export var walk_speed: float = 240.0
-@export var sprint_speed: float = 380.0
+@export var walk_speed: float = 160.0
+@export var sprint_speed: float = 210.0
 @export var max_health: int = 100
-@export var attack_damage: int = 25
+@export var attack_damage: int = 14
 @export var attack_range: float = 65.0
-@export var attack_cooldown_time: float = 0.35
+@export var attack_cooldown_time: float = 0.75
 
 var current_health: int = 100
 var attack_timer: float = 0.0
 var is_alive: bool = true
 var last_facing_dir: Vector2 = Vector2.RIGHT
+
+# Bot Controller Integration
+var is_bot_controlled: bool = false
+var bot_move_dir: Vector2 = Vector2.ZERO
+var bot_wants_sprint: bool = false
 
 @onready var hp_bar: ProgressBar = $ProgressBar if has_node("ProgressBar") else null
 @onready var visual: Node2D = $HumanoidVisual if has_node("HumanoidVisual") else null
@@ -48,25 +53,29 @@ func _physics_process(delta: float) -> void:
 	if attack_timer > 0.0:
 		attack_timer -= delta
 	
-	# Handle Attack input (Spacebar, UI Accept, or Left Mouse Click)
-	if Input.is_action_just_pressed("ui_accept") or Input.is_key_pressed(KEY_SPACE) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		perform_attack()
+	# Handle Attack & Movement based on Bot vs Manual control
+	var direction = Vector2.ZERO
+	var speed = walk_speed
 	
-	# Handle Movement Input (supports both Arrow Keys and WASD)
-	var input_vector = Vector2.ZERO
-	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
-		input_vector.x += 1.0
-	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
-		input_vector.x -= 1.0
-	if Input.is_action_pressed("ui_down") or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
-		input_vector.y += 1.0
-	if Input.is_action_pressed("ui_up") or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
-		input_vector.y -= 1.0
-	
-	var direction = input_vector.normalized()
-	
-	# Sprint check (Shift key)
-	var speed = sprint_speed if (Input.is_key_pressed(KEY_SHIFT)) else walk_speed
+	if is_bot_controlled:
+		direction = bot_move_dir.normalized()
+		speed = sprint_speed if bot_wants_sprint else walk_speed
+	else:
+		if Input.is_action_just_pressed("ui_accept") or Input.is_key_pressed(KEY_SPACE) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			perform_attack()
+		
+		# Handle Movement Input (supports both Arrow Keys and WASD)
+		var input_vector = Vector2.ZERO
+		if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+			input_vector.x += 1.0
+		if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+			input_vector.x -= 1.0
+		if Input.is_action_pressed("ui_down") or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+			input_vector.y += 1.0
+		if Input.is_action_pressed("ui_up") or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+			input_vector.y -= 1.0
+		direction = input_vector.normalized()
+		speed = sprint_speed if (Input.is_key_pressed(KEY_SHIFT)) else walk_speed
 	
 	# Apply velocity & update humanoid facing
 	if direction != Vector2.ZERO:
