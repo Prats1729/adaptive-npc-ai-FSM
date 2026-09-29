@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://b7v8k9w2x4y1z" path="res://scripts/perception_rings.gd" id="2_rings"]
 [ext_resource type="Script" uid="uid://b23v8y8q4hn7m" path="res://scripts/humanoid_visual.gd" id="3_humanoid_vis"]
 [ext_resource type="Script" uid="uid://brg1jkyxxorjo" path="res://scripts/enemy_fsm.gd" id="4_enemy_fsm"]
+[ext_resource type="Script" uid="uid://b8v6k3w1x9y2z" path="res://scripts/adaptive_logic.gd" id="5_adaptive"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
 radius = 16.0
@@ -37,6 +38,9 @@ is_enemy = true
 
 [node name="EnemyFSM" type="Node" parent="." unique_id=100715776]
 script = ExtResource("4_enemy_fsm")
+
+[node name="AdaptiveLogic" type="Node" parent="EnemyFSM" unique_id=100715777]
+script = ExtResource("5_adaptive")
 
 [node name="StateLabel" type="Label" parent="." unique_id=1712403922]
 offset_left = -100.0

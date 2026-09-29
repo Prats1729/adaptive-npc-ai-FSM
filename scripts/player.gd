@@ -4,7 +4,7 @@ extends CharacterBody2D
 # PLAYER CONTROLLER
 # ------------------------------------------------------------------------------
 # Handles player movement (WASD / Arrow Keys), sprinting (Shift),
-# basic melee attack (Space / Left Mouse Button), and health tracking.
+# melee attack (Space / Left Mouse Button), and health tracking.
 # Controls the procedural 2D humanoid visual representation.
 # ==============================================================================
 
@@ -98,6 +98,11 @@ func perform_attack() -> void:
 		enemy = get_parent().get_node_or_null("EnemyNPC")
 	
 	if enemy and is_instance_valid(enemy):
+		# Notify enemy FSM of player attack for aggression telemetry
+		var enemy_fsm = enemy.get_node_or_null("EnemyFSM")
+		if enemy_fsm and enemy_fsm.has_method("notify_player_attacked"):
+			enemy_fsm.notify_player_attacked()
+		
 		var distance = global_position.distance_to(enemy.global_position)
 		if distance <= attack_range:
 			if enemy.has_method("take_damage"):

@@ -4,7 +4,7 @@ extends Node2D
 # ARENA CONTROLLER & SIMULATION MANAGER
 # ------------------------------------------------------------------------------
 # Minimalistic Arena coordinator displaying only essential Player & NPC vitals.
-# Handles reset (R) and test damage shortcuts (1, 2).
+# Handles reset (R), test damage shortcuts (1, 2), and FSM mode toggle (T).
 # ==============================================================================
 
 @onready var player: CharacterBody2D = $Player
@@ -42,6 +42,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.keycode == KEY_R:
 		reset_simulation()
 	
+	# Press T: Toggle between Basic FSM and Adaptive FSM
+	elif event.keycode == KEY_T:
+		if fsm and fsm.has_method("toggle_adaptive"):
+			var is_adap = fsm.toggle_adaptive()
+			var mode_str = "ADAPTIVE FSM" if is_adap else "BASIC FSM"
+			print("[AI Mode Switch] Now running in: " + mode_str)
+			_update_vitals_ui()
+	
 	# Press 1: Viva Shortcut - Deal 25 Damage to Enemy
 	elif event.keycode == KEY_1:
 		if enemy and is_instance_valid(enemy):
@@ -78,7 +86,8 @@ func _on_enemy_health_changed(current_hp: int, max_hp: int) -> void:
 		enemy_hp_bar.max_value = max_hp
 		enemy_hp_bar.value = current_hp
 	if enemy_hp_text:
-		enemy_hp_text.text = "NPC HP: %d / %d" % [current_hp, max_hp]
+		var mode_str = "ADAPTIVE" if (fsm and fsm.is_adaptive()) else "BASIC"
+		enemy_hp_text.text = "NPC HP: %d / %d  [%s]" % [current_hp, max_hp, mode_str]
 
 func _update_vitals_ui() -> void:
 	if player:
