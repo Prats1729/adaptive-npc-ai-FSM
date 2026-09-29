@@ -3,26 +3,25 @@ extends Node2D
 # ==============================================================================
 # PROCEDURAL ARENA MAP RENDERER
 # ------------------------------------------------------------------------------
-# Renders a sleek, high-visibility 2D top-down combat arena with:
+# Renders a sleek, clean 2D top-down combat arena with:
 # - Stone floor tiles and subtle geometric combat ring
 # - Player & NPC spawn pads
 # - Perimeter stone walls with depth and beveling
-# - Obstacle pillars with drop shadows and collision bounds
-# - Real-time FSM sensory perception circles (Detection, Attack, Safe zones)
+# - Obstacle pillars with drop shadows
 # ==============================================================================
 
-@export var show_perception_zones: bool = true
-@export var arena_rect: Rect2 = Rect2(30, 120, 1092, 420)
+@export var show_perception_zones: bool = false
+@export var arena_rect: Rect2 = Rect2(30, 70, 1092, 510)
 
 var enemy_npc: Node2D = null
 var enemy_fsm: Node = null
 
 # Obstacle pillar centers
 const PILLAR_POSITIONS = [
-	Vector2(440, 240),
-	Vector2(712, 240),
-	Vector2(440, 420),
-	Vector2(712, 420)
+	Vector2(440, 230),
+	Vector2(712, 230),
+	Vector2(440, 430),
+	Vector2(712, 430)
 ]
 const PILLAR_RADIUS = 24.0
 
@@ -31,10 +30,6 @@ func _ready() -> void:
 	if enemy_npc:
 		enemy_fsm = enemy_npc.get_node_or_null("EnemyFSM")
 	queue_redraw()
-
-func _process(_delta: float) -> void:
-	if show_perception_zones and enemy_npc:
-		queue_redraw()
 
 func _draw() -> void:
 	# 1. Base Arena Floor
@@ -54,9 +49,9 @@ func _draw() -> void:
 	
 	# 2. Central Arena Crest / Combat Ring
 	var center = arena_rect.get_center()
-	draw_circle(center, 90.0, Color(0.18, 0.20, 0.27, 0.35))
-	draw_arc(center, 90.0, 0, TAU, 48, Color(0.28, 0.32, 0.42, 0.8), 2.0, true)
-	draw_arc(center, 40.0, 0, TAU, 32, Color(0.28, 0.32, 0.42, 0.5), 1.5, true)
+	draw_circle(center, 95.0, Color(0.18, 0.20, 0.27, 0.35))
+	draw_arc(center, 95.0, 0, TAU, 48, Color(0.28, 0.32, 0.42, 0.8), 2.0, true)
+	draw_arc(center, 42.0, 0, TAU, 32, Color(0.28, 0.32, 0.42, 0.5), 1.5, true)
 	draw_line(center - Vector2(20, 0), center + Vector2(20, 0), Color(0.35, 0.4, 0.52, 0.6), 2.0)
 	draw_line(center - Vector2(0, 20), center + Vector2(0, 20), Color(0.35, 0.4, 0.52, 0.6), 2.0)
 	
@@ -91,21 +86,3 @@ func _draw() -> void:
 	draw_rect(arena_rect, wall_shadow_color, false, 4.0)
 	# Beveled outer rim
 	draw_rect(Rect2(arena_rect.position - Vector2(2, 2), arena_rect.size + Vector2(4, 4)), wall_border_color, false, 2.5)
-	
-	# 6. Real-Time Sensory Perception Zones (Drawn around Enemy NPC)
-	if show_perception_zones and enemy_npc and is_instance_valid(enemy_npc) and enemy_npc.current_health > 0:
-		var npc_pos = enemy_npc.global_position
-		var det_range = 220.0
-		var atk_range = 65.0
-		
-		if enemy_fsm:
-			det_range = enemy_fsm.detection_range
-			atk_range = enemy_fsm.attack_range
-		
-		# Detection Range Zone (Yellow/Amber translucent circle)
-		draw_circle(npc_pos, det_range, Color(1.0, 0.85, 0.2, 0.035))
-		draw_arc(npc_pos, det_range, 0, TAU, 48, Color(1.0, 0.85, 0.2, 0.35), 1.5, true)
-		
-		# Attack Range Zone (Red translucent circle)
-		draw_circle(npc_pos, atk_range, Color(1.0, 0.25, 0.25, 0.06))
-		draw_arc(npc_pos, atk_range, 0, TAU, 32, Color(1.0, 0.25, 0.25, 0.5), 1.5, true)

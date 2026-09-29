@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://lrlmfejpbkt7"]
 
 [ext_resource type="Script" uid="uid://c51rtcufu8iur" path="res://scripts/enemy_npc.gd" id="1_n6ve1"]
-[ext_resource type="Script" uid="uid://b23v8y8q4hn7m" path="res://scripts/humanoid_visual.gd" id="2_humanoid_vis"]
-[ext_resource type="Script" uid="uid://brg1jkyxxorjo" path="res://scripts/enemy_fsm.gd" id="3_enemy_fsm"]
+[ext_resource type="Script" uid="uid://b7v8k9w2x4y1z" path="res://scripts/perception_rings.gd" id="2_rings"]
+[ext_resource type="Script" uid="uid://b23v8y8q4hn7m" path="res://scripts/humanoid_visual.gd" id="3_humanoid_vis"]
+[ext_resource type="Script" uid="uid://brg1jkyxxorjo" path="res://scripts/enemy_fsm.gd" id="4_enemy_fsm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
 radius = 16.0
@@ -24,15 +25,18 @@ corner_radius_bottom_left = 3
 [node name="EnemyNPC" type="CharacterBody2D" unique_id=1502939056]
 script = ExtResource("1_n6ve1")
 
+[node name="PerceptionRings" type="Node2D" parent="." unique_id=1502939057]
+script = ExtResource("2_rings")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1540427907]
 shape = SubResource("CircleShape2D_enemy")
 
 [node name="HumanoidVisual" type="Node2D" parent="." unique_id=1874193074]
-script = ExtResource("2_humanoid_vis")
+script = ExtResource("3_humanoid_vis")
 is_enemy = true
 
 [node name="EnemyFSM" type="Node" parent="." unique_id=100715776]
-script = ExtResource("3_enemy_fsm")
+script = ExtResource("4_enemy_fsm")
 
 [node name="StateLabel" type="Label" parent="." unique_id=1712403922]
 offset_left = -100.0
