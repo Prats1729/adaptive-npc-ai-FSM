@@ -1,97 +1,229 @@
 extends Node
 
-# The possible states our enemy can be in
+# ==============================================================================
+# ENEMY FINITE STATE MACHINE (FSM)
+# ------------------------------------------------------------------------------
+# Core AI Decision-Making Component.
+# Evaluates sensory perception (player distance, entity health) each physics tick
+# and executes transparent, rule-based state transitions with clear explainability.
+# ==============================================================================
+
+signal state_changed(old_state_name: String, new_state_name: String, reason: String)
+signal telemetry_updated(telemetry_data: Dictionary)
+
 enum State {
-	PATROL,
+	IDLE,
 	CHASE,
 	ATTACK,
-	RETREAT,
+	FLEE,
 	DEAD
 }
 
-var current_state: State = State.PATROL
-var enemy: CharacterBody2D
-var state_label: Label
-var attack_cooldown: float = 0.0
+@export_group("FSM Decision Thresholds")
+@export var detection_range: float = 220.0
+@export var attack_range: float = 65.0
+@export var safe_distance: float = 300.0
+@export var flee_health_ratio: float = 0.30 # 30% max health
+@export var attack_damage: int = 12
+@export var attack_cooldown_time: float = 1.0
 
-# Baseline Thresholds (we will make these adaptive later!)
-var detection_range: float = 180.0
-var attack_range: float = 55.0
-var retreat_health_percent: float = 0.25 # 25%
+var current_state: State = State.IDLE
+var enemy: CharacterBody2D = null
+var attack_timer: float = 0.0
+var last_reason: String = "Simulation Initialized"
+var is_active: bool = true
+
+# Colors representing each state for visual feedback
+const STATE_COLORS = {
+	State.IDLE: Color(0.4, 0.9, 0.5),     # Emerald Green (Calm/Neutral)
+	State.CHASE: Color(1.0, 0.82, 0.2),   # Golden Amber (Alert/Pursuing)
+	State.ATTACK: Color(1.0, 0.25, 0.25), # Crimson Red (Aggressive/Engaging)
+	State.FLEE: Color(0.2, 0.75, 1.0),    # Dodger Blue (Evasive/Retreating)
+	State.DEAD: Color(0.45, 0.45, 0.45)   # Charcoal Gray (Defeated)
+}
 
 func _ready() -> void:
-	enemy = get_parent()
-	state_label = enemy.get_node_or_null("StateLabel")
-	print("Starting state: PATROL")
-	if state_label:
-		state_label.text = "PATROL\nReason: Initialized"
+	enemy = get_parent() as CharacterBody2D
+	current_state = State.IDLE
+	last_reason = "System started in default IDLE state."
+	
+	if enemy:
+		enemy.update_visual_state(get_state_name(current_state), get_state_color(current_state), last_reason)
 
 func _physics_process(delta: float) -> void:
-	if not enemy or not enemy.player:
+	if not is_active or not enemy:
 		return
 	
-	if attack_cooldown > 0:
-		attack_cooldown -= delta
-		
-	var distance_to_player = enemy.global_position.distance_to(enemy.player.global_position)
-	var health_percent = float(enemy.current_health) / float(enemy.max_health)
-	
-	if enemy.current_health <= 0 and current_state != State.DEAD:
-		change_state(State.DEAD, "Health reached 0")
+	if not enemy.player or not is_instance_valid(enemy.player):
+		enemy.find_player_reference()
+		if not enemy.player:
+			return
+
+	# Handle attack cooldown timer
+	if attack_timer > 0.0:
+		attack_timer -= delta
+
+	# Check for NPC death condition
+	if enemy.current_health <= 0:
+		if current_state != State.DEAD:
+			change_state(State.DEAD, "Enemy health dropped to 0.")
 		return
+
+	# Sensory Perception
+	var player_pos: Vector2 = enemy.player.global_position
+	var distance_to_player: float = enemy.global_position.distance_to(player_pos)
+	var health_ratio: float = float(enemy.current_health) / float(enemy.max_health)
 	
-	# The Brain: Decide what to do based on the current state
+	# Send live telemetry to HUD / Event Log
+	emit_telemetry(distance_to_player, health_ratio)
+
+	# Global Transition Rule: If health is low (<= 30%), switch to FLEE unless already FLEE or DEAD
+	if health_ratio <= flee_health_ratio and current_state != State.FLEE and current_state != State.DEAD:
+		change_state(
+			State.FLEE, 
+			"Low Health (HP: %d/%d - %.0f%% <= %.0f%% threshold)" % [
+				enemy.current_health, 
+				enemy.max_health, 
+				health_ratio * 100.0, 
+				flee_health_ratio * 100.0
+			]
+		)
+		return
+
+	# State-specific Execution and Transition Rules
 	match current_state:
-		State.PATROL:
-			enemy.stop_moving() # We will add actual moving between patrol points later
+		State.IDLE:
+			_process_idle_state(distance_to_player)
 			
-			if health_percent < retreat_health_percent:
-				change_state(State.RETREAT, "Enemy health dropped below 25%")
-			elif distance_to_player <= detection_range:
-				change_state(State.CHASE, "Player entered detection range (" + str(round(distance_to_player)) + "px)")
-				
 		State.CHASE:
-			# Move towards the player!
-			enemy.move_towards_point(enemy.player.global_position)
+			_process_chase_state(player_pos, distance_to_player)
 			
-			if health_percent < retreat_health_percent:
-				change_state(State.RETREAT, "Enemy health dropped below 25%")
-			elif distance_to_player <= attack_range:
-				change_state(State.ATTACK, "Player entered attack range (" + str(round(distance_to_player)) + "px)")
-			elif distance_to_player > detection_range:
-				change_state(State.PATROL, "Player escaped detection range")
-				
 		State.ATTACK:
-			enemy.stop_moving()
-			if attack_cooldown <= 0:
-				enemy.player.take_damage(10)
-				attack_cooldown = 1.0 # 1 second cooldown
+			_process_attack_state(distance_to_player)
 			
-			if health_percent < retreat_health_percent:
-				change_state(State.RETREAT, "Enemy health dropped below 25%")
-			elif distance_to_player > attack_range:
-				change_state(State.CHASE, "Player moved outside attack range")
-				
-		State.RETREAT:
-			# Calculate direction away from the player and run!
-			var flee_dir = enemy.player.global_position.direction_to(enemy.global_position)
-			enemy.move_towards_point(enemy.global_position + flee_dir * 100)
+		State.FLEE:
+			_process_flee_state(player_pos, distance_to_player, health_ratio)
 			
-			if distance_to_player > detection_range * 1.5:
-				change_state(State.PATROL, "Safe distance reached, returning to patrol")
-				
 		State.DEAD:
 			enemy.stop_moving()
-			# Do nothing, wait for simulation to reset
 
-# Explainability requirement: Log exactly WHY the AI made a decision
-func change_state(new_state: State, reason: String) -> void:
-	var old_state_name = State.keys()[current_state]
-	var new_state_name = State.keys()[new_state]
+# --- STATE ACTIONS & TRANSITION LOGIC ---
+
+func _process_idle_state(distance: float) -> void:
+	# Idle Behavior: Remain alert in position
+	if enemy.player:
+		enemy.stop_moving(enemy.player.global_position)
+	else:
+		enemy.stop_moving()
 	
-	print(old_state_name + " -> " + new_state_name + ": " + reason)
+	# Transition: IDLE -> CHASE when player enters detection range
+	if distance <= detection_range:
+		change_state(
+			State.CHASE,
+			"Player entered detection range (Distance: %d px <= %d px)" % [round(distance), round(detection_range)]
+		)
+
+func _process_chase_state(target_pos: Vector2, distance: float) -> void:
+	# Chase Behavior: Move directly toward the player position
+	enemy.move_towards_point(target_pos, enemy.base_speed)
+	
+	# Transition 1: CHASE -> ATTACK when within attack range
+	if distance <= attack_range:
+		change_state(
+			State.ATTACK,
+			"Player entered attack range (Distance: %d px <= %d px)" % [round(distance), round(attack_range)]
+		)
+	# Transition 2: CHASE -> IDLE when player escapes beyond detection radius (with hysteresis margin)
+	elif distance > detection_range * 1.2:
+		change_state(
+			State.IDLE,
+			"Player escaped detection range (Distance: %d px > %d px)" % [round(distance), round(detection_range * 1.2)]
+		)
+
+func _process_attack_state(distance: float) -> void:
+	# Attack Behavior: Face player and execute melee strikes on cooldown
+	if enemy.player:
+		enemy.stop_moving(enemy.player.global_position)
+	else:
+		enemy.stop_moving()
+	
+	if attack_timer <= 0.0:
+		attack_timer = attack_cooldown_time
+		if enemy.has_method("trigger_attack_visual"):
+			enemy.trigger_attack_visual()
+		if enemy.player and enemy.player.has_method("take_damage"):
+			enemy.player.take_damage(attack_damage)
+	
+	# Transition: ATTACK -> CHASE if player steps out of attack range
+	if distance > attack_range * 1.25:
+		change_state(
+			State.CHASE,
+			"Player moved outside attack range (Distance: %d px > %d px)" % [round(distance), round(attack_range * 1.25)]
+		)
+
+func _process_flee_state(player_pos: Vector2, distance: float, _health_ratio: float) -> void:
+	# Flee Behavior: Move along vector directly opposite to player position
+	var flee_direction = (enemy.global_position - player_pos).normalized()
+	var flee_target = enemy.global_position + flee_direction * 150.0
+	enemy.move_towards_point(flee_target, enemy.flee_speed)
+	
+	# Transition: FLEE -> IDLE once a safe distance is established
+	if distance >= safe_distance:
+		change_state(
+			State.IDLE,
+			"Established safe distance from player (Distance: %d px >= %d px)" % [round(distance), round(safe_distance)]
+		)
+
+# --- EXPLAINABILITY & STATE SWITCHING ---
+
+func change_state(new_state: State, reason: String) -> void:
+	if current_state == new_state:
+		return
+	
+	var old_state_name = get_state_name(current_state)
+	var new_state_name = get_state_name(new_state)
+	last_reason = reason
+	
+	print("[FSM] %s -> %s | Reason: %s" % [old_state_name, new_state_name, reason])
 	
 	current_state = new_state
 	
-	if state_label:
-		state_label.text = new_state_name + "\nReason: " + reason
+	if enemy:
+		enemy.update_visual_state(new_state_name, get_state_color(new_state), reason)
+	
+	state_changed.emit(old_state_name, new_state_name, reason)
+
+func get_state_name(state: State) -> String:
+	match state:
+		State.IDLE: return "IDLE"
+		State.CHASE: return "CHASE"
+		State.ATTACK: return "ATTACK"
+		State.FLEE: return "FLEE"
+		State.DEAD: return "DEAD"
+		_: return "UNKNOWN"
+
+func get_state_color(state: State) -> Color:
+	if STATE_COLORS.has(state):
+		return STATE_COLORS[state]
+	return Color.WHITE
+
+func emit_telemetry(distance: float, health_ratio: float) -> void:
+	var data = {
+		"state_name": get_state_name(current_state),
+		"state_color": get_state_color(current_state),
+		"distance_to_player": distance,
+		"detection_range": detection_range,
+		"attack_range": attack_range,
+		"safe_distance": safe_distance,
+		"health_ratio": health_ratio,
+		"attack_cooldown": max(0.0, attack_timer),
+		"reason": last_reason
+	}
+	telemetry_updated.emit(data)
+
+func reset_fsm() -> void:
+	attack_timer = 0.0
+	current_state = State.IDLE
+	last_reason = "FSM reset to initial IDLE state."
+	if enemy:
+		enemy.update_visual_state(get_state_name(current_state), get_state_color(current_state), last_reason)

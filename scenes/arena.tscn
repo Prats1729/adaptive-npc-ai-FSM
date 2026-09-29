@@ -1,20 +1,53 @@
 [gd_scene format=3 uid="uid://jqvpjvgqg6w5"]
 
-[ext_resource type="PackedScene" uid="uid://x0pv8aasw4v8" path="res://scenes/player.tscn" id="1_e05a3"]
 [ext_resource type="Script" uid="uid://ctiysp7ucfs57" path="res://scripts/arena.gd" id="1_olpmc"]
+[ext_resource type="PackedScene" uid="uid://x0pv8aasw4v8" path="res://scenes/player.tscn" id="1_e05a3"]
 [ext_resource type="PackedScene" uid="uid://lrlmfejpbkt7" path="res://scenes/enemy_npc.tscn" id="2_wl4x5"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_x2ntn"]
-size = Vector2(651, 20.5)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_top"]
+size = Vector2(1152, 20)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_g21bf"]
-size = Vector2(649.99585, 15.5662565)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bottom"]
+size = Vector2(1152, 20)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ubfh8"]
-size = Vector2(1148, 17)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_left"]
+size = Vector2(20, 648)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_444vf"]
-size = Vector2(1148, 17)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_right"]
+size = Vector2(20, 648)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.0980392, 0.113725, 0.156863, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.29, 0.38, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_hp"]
+bg_color = Color(0.2, 0.75, 0.35, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_enemy_hp"]
+bg_color = Color(0.9, 0.25, 0.25, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+bg_color = Color(0.05, 0.05, 0.08, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="Environment" id="Environment_eo7yt"]
 background_mode = 3
@@ -26,34 +59,199 @@ script = ExtResource("1_olpmc")
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1469901882]
 offset_right = 1152.0
 offset_bottom = 648.0
-color = Color(0.442166, 0.42498937, 0.4450249, 1)
+color = Color(0.12549, 0.141176, 0.188235, 1)
+
+[node name="FloorGrid" type="ColorRect" parent="." unique_id=1469901883]
+offset_left = 20.0
+offset_top = 130.0
+offset_right = 1132.0
+offset_bottom = 530.0
+color = Color(0.160784, 0.180392, 0.235294, 0.6)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1800397950]
-position = Vector2(316, 166)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=2112086403]
-position = Vector2(824.25, 158.5)
-rotation = 1.5707964
-shape = SubResource("RectangleShape2D_x2ntn")
+[node name="TopWall" type="CollisionShape2D" parent="Walls" unique_id=2112086403]
+position = Vector2(576, 120)
+shape = SubResource("RectangleShape2D_top")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls" unique_id=227861339]
-position = Vector2(-307.29193, 159.9997)
-rotation = 1.5710273
-shape = SubResource("RectangleShape2D_g21bf")
+[node name="BottomWall" type="CollisionShape2D" parent="Walls" unique_id=227861339]
+position = Vector2(576, 540)
+shape = SubResource("RectangleShape2D_bottom")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls" unique_id=1393362298]
-position = Vector2(258, 473)
-shape = SubResource("RectangleShape2D_ubfh8")
+[node name="LeftWall" type="CollisionShape2D" parent="Walls" unique_id=1393362298]
+position = Vector2(10, 330)
+shape = SubResource("RectangleShape2D_left")
 
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls" unique_id=1676785476]
-position = Vector2(259, -158)
-shape = SubResource("RectangleShape2D_444vf")
+[node name="RightWall" type="CollisionShape2D" parent="Walls" unique_id=1676785476]
+position = Vector2(1142, 330)
+shape = SubResource("RectangleShape2D_right")
 
 [node name="Player" parent="." unique_id=360769071 instance=ExtResource("1_e05a3")]
-position = Vector2(415, 319)
+position = Vector2(340, 330)
 
 [node name="EnemyNPC" parent="." unique_id=1502939056 instance=ExtResource("2_wl4x5")]
-position = Vector2(817, 313)
+position = Vector2(810, 330)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=671403823]
 environment = SubResource("Environment_eo7yt")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=987654321]
+
+[node name="MarginContainer" type="MarginContainer" parent="HUD" unique_id=987654322]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD/MarginContainer" unique_id=987654323]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HeaderBar" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer" unique_id=987654324]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/HeaderBar" unique_id=987654325]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "EXPLAINABLE AI SIMULATION: FINITE STATE MACHINE (FSM)"
+
+[node name="Spacer" type="Control" parent="HUD/MarginContainer/VBoxContainer/HeaderBar" unique_id=987654326]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SubtitleLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/HeaderBar" unique_id=987654327]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "[R] Reset Simulation | [1] Test Damage NPC | [2] Test Damage Player"
+
+[node name="TopSection" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer" unique_id=987654328]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="AIStatusPanel" type="PanelContainer" parent="HUD/MarginContainer/VBoxContainer/TopSection" unique_id=987654329]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.4
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel" unique_id=987654330]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="StateBadge" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox" unique_id=987654331]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "NPC STATE: IDLE"
+
+[node name="ReasonLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox" unique_id=987654332]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "Decision Reason: System initialized in default IDLE state."
+autowrap_mode = 2
+
+[node name="Metrics" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox" unique_id=987654333]
+layout_mode = 2
+
+[node name="DistLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/Metrics" unique_id=987654334]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "Distance: "
+
+[node name="DistanceVal" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/Metrics" unique_id=987654335]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 11
+text = "470 px (Detect: 220 px | Atk: 60 px)"
+
+[node name="Sep" type="VSeparator" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/Metrics" unique_id=987654336]
+layout_mode = 2
+
+[node name="CdLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/Metrics" unique_id=987654337]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "Atk Cooldown: "
+
+[node name="CooldownVal" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/AIStatusPanel/VBox/Metrics" unique_id=987654338]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 11
+text = "Ready"
+
+[node name="VitalsPanel" type="PanelContainer" parent="HUD/MarginContainer/VBoxContainer/TopSection" unique_id=987654339]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="HUD/MarginContainer/VBoxContainer/TopSection/VitalsPanel" unique_id=987654340]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PlayerHPLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/VitalsPanel/VBox" unique_id=987654341]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "Player HP: 100 / 100"
+
+[node name="PlayerHPBar" type="ProgressBar" parent="HUD/MarginContainer/VBoxContainer/TopSection/VitalsPanel/VBox" unique_id=987654342]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_player_hp")
+value = 100.0
+show_percentage = false
+
+[node name="EnemyHPLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/TopSection/VitalsPanel/VBox" unique_id=987654343]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 12
+text = "NPC HP: 100 / 100 (Flee at <= 30%)"
+
+[node name="EnemyHPBar" type="ProgressBar" parent="HUD/MarginContainer/VBoxContainer/TopSection/VitalsPanel/VBox" unique_id=987654344]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_enemy_hp")
+value = 100.0
+show_percentage = false
+
+[node name="ArenaSpace" type="Control" parent="HUD/MarginContainer/VBoxContainer" unique_id=987654345]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomSection" type="VBoxContainer" parent="HUD/MarginContainer/VBoxContainer" unique_id=987654346]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LogPanel" type="PanelContainer" parent="HUD/MarginContainer/VBoxContainer/BottomSection" unique_id=987654347]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="LogContent" type="RichTextLabel" parent="HUD/MarginContainer/VBoxContainer/BottomSection/LogPanel" unique_id=987654348]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 11
+theme_override_font_sizes/bold_font_size = 11
+bbcode_enabled = true
+text = "[b][00:00][/b] Simulation Initialized."
+scroll_following = true
+
+[node name="ControlsFooter" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer/BottomSection" unique_id=987654349]
+layout_mode = 2
+
+[node name="ControlsLabel" type="Label" parent="HUD/MarginContainer/VBoxContainer/BottomSection/ControlsFooter" unique_id=987654350]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.65, 0.72, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "Controls: [W/A/S/D / Arrows] Move  |  [Shift] Sprint  |  [Space / Left Click] Attack  |  [1] Damage NPC (-25)  |  [2] Damage Player (-20)  |  [R] Reset"
