@@ -1,28 +1,40 @@
 [gd_scene format=3 uid="uid://x0pv8aasw4v8"]
 
 [ext_resource type="Script" uid="uid://vrjtpkeoytqe" path="res://scripts/player.gd" id="1_3vyb7"]
-[ext_resource type="Texture2D" uid="uid://cdlkqu2n8k5l6" path="res://assets/knight.jpg" id="2_player_tex"]
+[ext_resource type="Script" uid="uid://b23v8y8q4hn7m" path="res://scripts/humanoid_visual.gd" id="2_humanoid_vis"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_x2ntn"]
-size = Vector2(32, 32)
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 16.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ft05"]
-bg_color = Color(0.45490196, 0.6745098, 0.20784314, 1)
+bg_color = Color(0.2, 0.75, 0.35, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+bg_color = Color(0.08, 0.08, 0.12, 0.8)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="Player" type="CharacterBody2D" unique_id=360769071]
 script = ExtResource("1_3vyb7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1055580973]
-shape = SubResource("RectangleShape2D_x2ntn")
+shape = SubResource("CircleShape2D_player")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1546552380]
-scale = Vector2(0.03125, 0.03125)
-texture = ExtResource("2_player_tex")
+[node name="HumanoidVisual" type="Node2D" parent="." unique_id=1546552380]
+script = ExtResource("2_humanoid_vis")
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1941832126]
-offset_left = -20.0
-offset_top = 20.0
-offset_right = 20.0
-offset_bottom = 30.0
+offset_left = -22.0
+offset_top = 22.0
+offset_right = 22.0
+offset_bottom = 29.0
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_7ft05")
+value = 100.0
 show_percentage = false
