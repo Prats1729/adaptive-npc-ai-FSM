@@ -16,10 +16,13 @@ signal adaptation_updated(aggression_score: float, aggression_tier: String, det_
 @export var is_adaptive_enabled: bool = true
 
 # Baseline FSM Thresholds
-const BASE_DETECTION_RANGE: float = 220.0
+const BASE_DETECTION_RANGE: float = 240.0
 const BASE_FLEE_THRESHOLD: float = 0.30
-const MAX_ADAPTIVE_DETECTION: float = 285.0
+const BASE_ATTACK_COOLDOWN: float = 0.70
+
+const MAX_ADAPTIVE_DETECTION: float = 320.0
 const MAX_ADAPTIVE_FLEE_THRESHOLD: float = 0.45
+const MIN_ADAPTIVE_COOLDOWN: float = 0.45
 
 var fsm: Node = null
 var enemy: CharacterBody2D = null
@@ -28,6 +31,8 @@ var enemy: CharacterBody2D = null
 var player_aggression_score: float = 0.0 # Range: 0.0 (Passive) to 1.0 (Hyper-aggressive)
 var time_since_last_player_attack: float = 5.0
 var passive_distance_timer: float = 0.0
+
+var current_adaptive_explanation: String = "Monitoring player behavior..."
 
 func _ready() -> void:
 	fsm = get_parent()
@@ -41,7 +46,7 @@ func _physics_process(delta: float) -> void:
 	time_since_last_player_attack += delta
 	
 	# Smoothly decay aggression score over time when player isn't attacking
-	player_aggression_score = max(0.0, player_aggression_score - delta * 0.25)
+	player_aggression_score = max(0.0, player_aggression_score - delta * 0.20)
 	
 	# Check distance to player for passivity tracking
 	if enemy.player and is_instance_valid(enemy.player):
@@ -55,23 +60,43 @@ func _physics_process(delta: float) -> void:
 		# Enforce static baseline values in Basic FSM mode
 		fsm.detection_range = BASE_DETECTION_RANGE
 		fsm.flee_health_ratio = BASE_FLEE_THRESHOLD
+		fsm.attack_cooldown_time = BASE_ATTACK_COOLDOWN
+		current_adaptive_explanation = "Basic FSM: Operating with fixed baseline thresholds."
 		return
 	
 	# --- ADAPTIVE THRESHOLD MODULATION ---
 	
-	# Rule 1: High Aggression -> Increase retreat threshold (flee earlier to survive)
-	if player_aggression_score > 0.5:
-		var flee_boost = lerp(BASE_FLEE_THRESHOLD, MAX_ADAPTIVE_FLEE_THRESHOLD, (player_aggression_score - 0.5) * 2.0)
-		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, flee_boost, delta * 2.0)
+	# Rule 1: High Aggression -> Increase retreat threshold (flee earlier) AND counter-strike faster!
+	if player_aggression_score > 0.35:
+		var flee_boost = lerp(BASE_FLEE_THRESHOLD, MAX_ADAPTIVE_FLEE_THRESHOLD, min(1.0, (player_aggression_score - 0.35) * 1.8))
+		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, flee_boost, delta * 3.0)
+		
+		var cd_boost = lerp(BASE_ATTACK_COOLDOWN, MIN_ADAPTIVE_COOLDOWN, player_aggression_score)
+		fsm.attack_cooldown_time = lerp(fsm.attack_cooldown_time, cd_boost, delta * 3.0)
 	else:
 		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, BASE_FLEE_THRESHOLD, delta * 1.5)
+		fsm.attack_cooldown_time = lerp(fsm.attack_cooldown_time, BASE_ATTACK_COOLDOWN, delta * 1.5)
 	
-	# Rule 2: Passive / Distant Player -> Expand detection range (seek out passive player)
-	if passive_distance_timer > 2.5:
-		var target_det = min(MAX_ADAPTIVE_DETECTION, BASE_DETECTION_RANGE + (passive_distance_timer - 2.5) * 15.0)
-		fsm.detection_range = lerp(fsm.detection_range, target_det, delta * 1.5)
+	# Rule 2: Passive / Distant Player -> Expand detection range
+	if passive_distance_timer > 2.0:
+		var target_det = min(MAX_ADAPTIVE_DETECTION, BASE_DETECTION_RANGE + (passive_distance_timer - 2.0) * 20.0)
+		fsm.detection_range = lerp(fsm.detection_range, target_det, delta * 2.0)
 	else:
 		fsm.detection_range = lerp(fsm.detection_range, BASE_DETECTION_RANGE, delta * 2.0)
+	
+	# Dynamic explanation synthesis
+	if player_aggression_score > 0.5:
+		current_adaptive_explanation = "Adaptive Alert: High aggression (%.2f) -> Flee threshold raised to %.0f%% (Base: 30%%)" % [
+			player_aggression_score, fsm.flee_health_ratio * 100.0
+		]
+	elif passive_distance_timer > 2.5 and fsm.detection_range > BASE_DETECTION_RANGE + 3.0:
+		current_adaptive_explanation = "Adaptive Search & Enrage: Target passive for %.1fs -> Range %dpx, Cooldown %.2fs" % [
+			passive_distance_timer, round(fsm.detection_range), fsm.attack_cooldown_time
+		]
+	else:
+		current_adaptive_explanation = "Adaptive Neutral: Scanning environment (Aggression: %.2f, Range: %dpx)" % [
+			player_aggression_score, round(fsm.detection_range)
+		]
 	
 	var aggression_tier = get_aggression_tier()
 	adaptation_updated.emit(player_aggression_score, aggression_tier, fsm.detection_range, fsm.flee_health_ratio)
@@ -95,6 +120,7 @@ func toggle_adaptive_mode() -> bool:
 	if not is_adaptive_enabled and fsm:
 		fsm.detection_range = BASE_DETECTION_RANGE
 		fsm.flee_health_ratio = BASE_FLEE_THRESHOLD
+		fsm.attack_cooldown_time = BASE_ATTACK_COOLDOWN
 	return is_adaptive_enabled
 
 func reset_adaptive_telemetry() -> void:
@@ -104,3 +130,4 @@ func reset_adaptive_telemetry() -> void:
 	if fsm:
 		fsm.detection_range = BASE_DETECTION_RANGE
 		fsm.flee_health_ratio = BASE_FLEE_THRESHOLD
+		fsm.attack_cooldown_time = BASE_ATTACK_COOLDOWN
