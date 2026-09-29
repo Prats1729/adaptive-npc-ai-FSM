@@ -43,8 +43,8 @@ var episodes_per_policy_target: int = 50
 
 # Aggregate Benchmark Statistics
 var stats = {
-	"basic": {"trials": 0, "wins": 0, "survival_sum": 0.0},
-	"adaptive": {"trials": 0, "wins": 0, "survival_sum": 0.0}
+	"basic": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0},
+	"adaptive": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0}
 }
 var episode_history: Array = []
 
@@ -125,7 +125,7 @@ func start_full_suite_benchmark(episodes_per_policy: int = 50) -> void:
 	episodes_per_policy_target = episodes_per_policy
 	
 	# High speed for large batch collection
-	Engine.time_scale = 3.5
+	Engine.time_scale = 6.0
 	
 	batch_target_episodes = episodes_per_policy
 	batch_current_index = 0
@@ -135,7 +135,7 @@ func start_full_suite_benchmark(episodes_per_policy: int = 50) -> void:
 		player_bot.set_mode(batch_bot_mode)
 	
 	print("\n=======================================================")
-	print("[FULL SUITE BENCHMARK STARTED] %d games on each of 3 bot policies (Total %d games) at 3.5x speed..." % [
+	print("[FULL SUITE BENCHMARK STARTED] %d games on each of 3 bot policies (Total %d games) at 6.0x speed..." % [
 		episodes_per_policy, episodes_per_policy * 3
 	])
 	print("=======================================================\n")
@@ -216,9 +216,11 @@ func _conclude_episode(npc_won: bool, player_won: bool, outcome_reason: String) 
 	# Update aggregate statistics
 	var stat_key = "adaptive" if is_adaptive else "basic"
 	stats[stat_key]["trials"] += 1
-	stats[stat_key]["survival_sum"] += episode_elapsed_time
 	if npc_won:
 		stats[stat_key]["wins"] += 1
+	else:
+		stats[stat_key]["losses"] += 1
+		stats[stat_key]["survival_sum"] += episode_elapsed_time
 	
 	episode_history.append(episode_data)
 	
@@ -244,8 +246,11 @@ func _finish_batch_benchmark() -> void:
 	var basic_win_rate = (float(stats["basic"]["wins"]) / float(basic_trials)) * 100.0
 	var adap_win_rate = (float(stats["adaptive"]["wins"]) / float(adap_trials)) * 100.0
 	
-	var basic_avg_surv = stats["basic"]["survival_sum"] / float(basic_trials)
-	var adap_avg_surv = stats["adaptive"]["survival_sum"] / float(adap_trials)
+	var basic_losses = max(1, stats["basic"]["losses"])
+	var adap_losses = max(1, stats["adaptive"]["losses"])
+	
+	var basic_avg_surv = stats["basic"]["survival_sum"] / float(basic_losses)
+	var adap_avg_surv = stats["adaptive"]["survival_sum"] / float(adap_losses)
 	
 	var summary = {
 		"basic_win_rate": basic_win_rate,

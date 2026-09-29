@@ -28,7 +28,7 @@ enum State {
 
 @export_group("FSM Decision Thresholds")
 @export var detection_range: float = 200.0
-@export var attack_range: float = 60.0
+@export var attack_range: float = 45.0
 @export var safe_distance: float = 250.0
 @export var flee_health_ratio: float = 0.25 # 25% max health
 @export var attack_damage: int = 12

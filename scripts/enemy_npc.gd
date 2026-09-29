@@ -11,11 +11,11 @@ extends CharacterBody2D
 signal health_changed(current_health: int, max_health: int)
 signal enemy_died()
 
-@export var max_health: int = 100
+@export var max_health: int = 200
 @export var base_speed: float = 130.0
 @export var flee_speed: float = 175.0
 
-var current_health: int = 100
+var current_health: int = 200
 var player: Node2D = null
 var spawn_position: Vector2 = Vector2.ZERO
 

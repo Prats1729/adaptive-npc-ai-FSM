@@ -14,12 +14,12 @@ signal player_died()
 
 @export var walk_speed: float = 155.0
 @export var sprint_speed: float = 200.0
-@export var max_health: int = 100
+@export var max_health: int = 200
 @export var attack_damage: int = 12
-@export var attack_range: float = 60.0
+@export var attack_range: float = 45.0
 @export var attack_cooldown_time: float = 0.80
 
-var current_health: int = 100
+var current_health: int = 200
 var attack_timer: float = 0.0
 var is_alive: bool = true
 var last_facing_dir: Vector2 = Vector2.RIGHT

@@ -544,14 +544,14 @@
       cachedEpisodes = payload.episodes;
       const episodes = cachedEpisodes;
 
-      let basicWins = 0, basicCount = 0, basicSurv = 0;
-      let adapWins = 0, adapCount = 0, adapSurv = 0;
+      let basicWins = 0, basicCount = 0, basicLossCount = 0, basicSurv = 0;
+      let adapWins = 0, adapCount = 0, adapLossCount = 0, adapSurv = 0;
 
       // Group by policy
       const policyMap = {
-        'Aggressive': { basicWins: 0, basicCount: 0, basicSurv: 0, adapWins: 0, adapCount: 0, adapSurv: 0 },
-        'Defensive': { basicWins: 0, basicCount: 0, basicSurv: 0, adapWins: 0, adapCount: 0, adapSurv: 0 },
-        'Random': { basicWins: 0, basicCount: 0, basicSurv: 0, adapWins: 0, adapCount: 0, adapSurv: 0 }
+        'Aggressive': { basicWins: 0, basicCount: 0, basicLossCount: 0, basicSurv: 0, adapWins: 0, adapCount: 0, adapLossCount: 0, adapSurv: 0 },
+        'Defensive': { basicWins: 0, basicCount: 0, basicLossCount: 0, basicSurv: 0, adapWins: 0, adapCount: 0, adapLossCount: 0, adapSurv: 0 },
+        'Random': { basicWins: 0, basicCount: 0, basicLossCount: 0, basicSurv: 0, adapWins: 0, adapCount: 0, adapLossCount: 0, adapSurv: 0 }
       };
 
       episodes.forEach(ep => {
@@ -562,25 +562,35 @@
 
         if (isAdaptive) {
           adapCount++;
-          adapSurv += ep.npc_survival_time;
-          if (ep.npc_won) adapWins++;
           policyMap[policyKey].adapCount++;
-          policyMap[policyKey].adapSurv += ep.npc_survival_time;
-          if (ep.npc_won) policyMap[policyKey].adapWins++;
+          if (ep.npc_won) {
+            adapWins++;
+            policyMap[policyKey].adapWins++;
+          } else {
+            adapLossCount++;
+            adapSurv += ep.npc_survival_time;
+            policyMap[policyKey].adapLossCount++;
+            policyMap[policyKey].adapSurv += ep.npc_survival_time;
+          }
         } else {
           basicCount++;
-          basicSurv += ep.npc_survival_time;
-          if (ep.npc_won) basicWins++;
           policyMap[policyKey].basicCount++;
-          policyMap[policyKey].basicSurv += ep.npc_survival_time;
-          if (ep.npc_won) policyMap[policyKey].basicWins++;
+          if (ep.npc_won) {
+            basicWins++;
+            policyMap[policyKey].basicWins++;
+          } else {
+            basicLossCount++;
+            basicSurv += ep.npc_survival_time;
+            policyMap[policyKey].basicLossCount++;
+            policyMap[policyKey].basicSurv += ep.npc_survival_time;
+          }
         }
       });
 
       const adapWinRate = adapCount > 0 ? ((adapWins / adapCount) * 100).toFixed(1) : 0;
       const basicWinRate = basicCount > 0 ? ((basicWins / basicCount) * 100).toFixed(1) : 0;
-      const adapAvgSurv = adapCount > 0 ? (adapSurv / adapCount).toFixed(1) : 0;
-      const basicAvgSurv = basicCount > 0 ? (basicSurv / basicCount).toFixed(1) : 0;
+      const adapAvgSurv = adapLossCount > 0 ? (adapSurv / adapLossCount).toFixed(1) : 0;
+      const basicAvgSurv = basicLossCount > 0 ? (basicSurv / basicLossCount).toFixed(1) : 0;
 
       // Update Top KPIs
       document.getElementById('kpiAdaptiveWin').innerText = `${adapWinRate}%`;
@@ -661,8 +671,8 @@
       policies.forEach(p => {
         const data = policyMap[p];
         if (currentBarMetric === 'SURVIVAL') {
-          const bSurv = data.basicCount > 0 ? (data.basicSurv / data.basicCount).toFixed(1) : 0;
-          const aSurv = data.adapCount > 0 ? (data.adapSurv / data.adapCount).toFixed(1) : 0;
+          const bSurv = data.basicLossCount > 0 ? (data.basicSurv / data.basicLossCount).toFixed(1) : 0;
+          const aSurv = data.adapLossCount > 0 ? (data.adapSurv / data.adapLossCount).toFixed(1) : 0;
           basicData.push(parseFloat(bSurv));
           adapData.push(parseFloat(aSurv));
         } else {
@@ -692,8 +702,8 @@
 
         const bWin = d.basicCount > 0 ? ((d.basicWins / d.basicCount) * 100).toFixed(1) : '--';
         const aWin = d.adapCount > 0 ? ((d.adapWins / d.adapCount) * 100).toFixed(1) : '--';
-        const bSurv = d.basicCount > 0 ? (d.basicSurv / d.basicCount).toFixed(1) + 's' : '--';
-        const aSurv = d.adapCount > 0 ? (d.adapSurv / d.adapCount).toFixed(1) + 's' : '--';
+        const bSurv = d.basicLossCount > 0 ? (d.basicSurv / d.basicLossCount).toFixed(1) + 's' : '--';
+        const aSurv = d.adapLossCount > 0 ? (d.adapSurv / d.adapLossCount).toFixed(1) + 's' : '--';
         const delta = (d.basicCount > 0 && d.adapCount > 0) ? `+${(parseFloat(aWin) - parseFloat(bWin)).toFixed(1)}%` : '--';
 
         html += `
