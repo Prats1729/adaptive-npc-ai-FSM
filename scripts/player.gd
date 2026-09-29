@@ -12,12 +12,12 @@ signal health_changed(current_health: int, max_health: int)
 signal player_attacked()
 signal player_died()
 
-@export var walk_speed: float = 160.0
-@export var sprint_speed: float = 210.0
+@export var walk_speed: float = 155.0
+@export var sprint_speed: float = 200.0
 @export var max_health: int = 100
-@export var attack_damage: int = 14
-@export var attack_range: float = 65.0
-@export var attack_cooldown_time: float = 0.75
+@export var attack_damage: int = 12
+@export var attack_range: float = 60.0
+@export var attack_cooldown_time: float = 0.80
 
 var current_health: int = 100
 var attack_timer: float = 0.0

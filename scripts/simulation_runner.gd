@@ -13,7 +13,7 @@ signal episode_completed(episode_data: Dictionary)
 
 @export var is_benchmark_running: bool = false
 @export var episodes_per_batch: int = 10 # 5 Basic FSM vs 5 Adaptive FSM
-@export var max_episode_duration: float = 20.0
+@export var max_episode_duration: float = 30.0
 
 var arena: Node2D = null
 var player: CharacterBody2D = null
