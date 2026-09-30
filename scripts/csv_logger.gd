@@ -42,7 +42,7 @@ func clear_csv() -> void:
 func write_header(path: String) -> void:
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if file:
-		var header = "episode_id,system_type,player_bot_type,npc_survival_time,player_survival_time,npc_won,player_won,npc_hits,player_hits,state_transition_count,average_response_time,final_adaptive_retreat_threshold,final_adaptive_detection_range\n"
+		var header = "episode_id,system_type,player_bot_type,npc_survival_time,player_survival_time,npc_won,player_won,npc_hits,player_hits,state_transition_count,average_post_attack_response_latency,final_adaptive_retreat_threshold,final_adaptive_detection_range\n"
 		file.store_string(header)
 		file.close()
 
@@ -58,7 +58,7 @@ func log_episode(data: Dictionary) -> void:
 		data.get("npc_hits", 0),
 		data.get("player_hits", 0),
 		data.get("state_transition_count", 0),
-		data.get("average_response_time", 0.016),
+		data.get("average_post_attack_response_latency", 0.016),
 		data.get("final_adaptive_retreat_threshold", 0.30),
 		data.get("final_adaptive_detection_range", 220.0)
 	]

@@ -316,9 +316,9 @@
       </div>
 
       <div class="kpi-card">
-        <div class="kpi-label">Mean Survival Time</div>
+        <div class="kpi-label">Mean Time Until Defeat / Episode End</div>
         <div class="kpi-num" id="kpiSurvival" style="color: var(--accent-emerald);">--</div>
-        <div class="kpi-desc" id="kpiSurvivalDesc">Adaptive vs Baseline duration</div>
+        <div class="kpi-desc" id="kpiSurvivalDesc">Note: 30.0s means survived to episode limit</div>
       </div>
 
       <div class="kpi-card">
@@ -349,9 +349,9 @@
       <!-- Figure 2: Opponent Policy Breakdown -->
       <div class="chart-panel">
         <div class="panel-header">
-          <h2 id="barChartTitle">Figure 2: NPC Survival by Opponent Policy</h2>
+          <h2 id="barChartTitle">Figure 2: NPC Time Until Defeat by Opponent Policy</h2>
           <div style="display: flex; gap: 0.35rem; align-items: center;">
-            <button class="pill-btn active" id="btnMetricSurv" onclick="setBarMetric('SURVIVAL')">Survival (s)</button>
+            <button class="pill-btn active" id="btnMetricSurv" onclick="setBarMetric('SURVIVAL')">Time Until Defeat (s)</button>
             <button class="pill-btn" id="btnMetricWin" onclick="setBarMetric('WINRATE')">Win Rate (%)</button>
           </div>
         </div>
@@ -374,8 +374,8 @@
             <th style="padding: 0.6rem 0.8rem;">Total Trials</th>
             <th style="padding: 0.6rem 0.8rem;">Baseline FSM Win %</th>
             <th style="padding: 0.6rem 0.8rem;">Adaptive FSM Win %</th>
-            <th style="padding: 0.6rem 0.8rem;">Baseline Avg Survival</th>
-            <th style="padding: 0.6rem 0.8rem;">Adaptive Avg Survival</th>
+            <th style="padding: 0.6rem 0.8rem;">Baseline Avg Time Until Defeat / Episode End</th>
+            <th style="padding: 0.6rem 0.8rem;">Adaptive Avg Time Until Defeat / Episode End</th>
             <th style="padding: 0.6rem 0.8rem;">Win Rate Gain</th>
           </tr>
         </thead>
@@ -383,6 +383,23 @@
           <tr><td colspan="7" style="padding: 1.25rem; text-align: center; color: var(--text-muted);">Awaiting benchmark run from Godot (Press B or N in simulation)</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Experiment Scope and Limitations -->
+    <div class="chart-panel" style="margin-top: 1.25rem;">
+      <div class="panel-header">
+        <h2>Experiment Scope and Limitations</h2>
+      </div>
+      <div style="font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.5;">
+        <ul style="padding-left: 1.2rem; margin: 0;">
+          <li style="margin-bottom: 0.4rem;">The results come from automated Aggressive, Defensive, and Random bots.</li>
+          <li style="margin-bottom: 0.4rem;">The evaluation compares a Basic FSM with an Adaptive Rule-Based FSM.</li>
+          <li style="margin-bottom: 0.4rem;">The result does not establish performance against human players or player enjoyment.</li>
+          <li style="margin-bottom: 0.4rem;">The Random bot already has a 100% Basic-FSM win rate, so adaptation shows no improvement under that policy.</li>
+          <li style="margin-bottom: 0.4rem;">The adaptive system uses explainable strategy changes, not reinforcement learning.</li>
+          <li>Each opponent policy has 50 total trials: 25 Basic FSM and 25 Adaptive FSM.</li>
+        </ul>
+      </div>
     </div>
 
     <!-- Internal Context -->
@@ -495,7 +512,7 @@
           x: { grid: { display: false } },
           y: {
             grid: { color: 'rgba(255, 255, 255, 0.03)' },
-            title: { display: true, text: 'Average Survival Time (s)', color: '#64748b' }
+            title: { display: true, text: 'Average Time Until Defeat / Episode End (s)', color: '#64748b' }
           }
         }
       }

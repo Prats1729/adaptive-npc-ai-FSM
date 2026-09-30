@@ -261,7 +261,7 @@ func _conclude_episode(npc_won: bool, player_won: bool, outcome_reason: String) 
 		"npc_hits": player_hits_taken,
 		"player_hits": npc_hits_taken,
 		"state_transition_count": state_transition_count,
-		"average_response_time": avg_resp,
+		"average_post_attack_response_latency": avg_resp,
 		"final_adaptive_retreat_threshold": final_retreat,
 		"final_adaptive_detection_range": final_detection
 	}
