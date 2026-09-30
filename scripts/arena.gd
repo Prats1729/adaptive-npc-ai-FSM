@@ -147,15 +147,21 @@ func _on_fsm_telemetry_updated(data: Dictionary) -> void:
 		state_label.modulate = data.get("state_color", Color.WHITE)
 	
 	var adaptive_logic = fsm.get_node_or_null("AdaptiveLogic") if fsm else null
-	var agg_score = adaptive_logic.player_aggression_score if adaptive_logic else 0.0
-	var agg_tier = adaptive_logic.get_aggression_tier() if adaptive_logic else "LOW"
-	var flee_thresh = (fsm.flee_health_ratio * 100.0) if fsm else 30.0
-	var det_range = round(data.get("detection_range", 220.0))
+	var is_adap = data.get("is_adaptive", false)
+	var flee_thresh = (fsm.flee_health_ratio * 100.0) if fsm else 25.0
+	var det_range = round(data.get("detection_range", 200.0))
 	
 	if metrics_label:
-		metrics_label.text = "Aggression: %.2f (%s)  |  Flee HP: %.0f%%  |  Range: %dpx" % [
-			agg_score, agg_tier, flee_thresh, det_range
-		]
+		if is_adap and adaptive_logic and adaptive_logic.has_method("get_active_rule_name"):
+			var rule_name = adaptive_logic.get_active_rule_name()
+			var rule_w = adaptive_logic.get_active_rule_weight()
+			metrics_label.text = "Spronck Policy: %s [W: %.0f]  |  Flee: %.0f%%  |  Range: %dpx" % [
+				rule_name, rule_w, flee_thresh, det_range
+			]
+		else:
+			metrics_label.text = "Fixed Baseline FSM  |  Flee HP: %.0f%%  |  Range: %dpx" % [
+				flee_thresh, det_range
+			]
 	
 	if reason_label and data.has("reason") and data["reason"] != "":
 		reason_label.text = "Reason: %s" % data["reason"]

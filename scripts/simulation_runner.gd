@@ -84,6 +84,13 @@ func _initialize_references() -> void:
 	if not csv_logger:
 		csv_logger = load("res://scripts/csv_logger.gd").new()
 		add_child(csv_logger)
+	
+	# Headless CLI benchmark automation
+	var cli_args = OS.get_cmdline_user_args()
+	if "--headless-suite" in cli_args:
+		call_deferred("start_full_suite_benchmark", 50)
+	elif "--headless-benchmark" in cli_args:
+		call_deferred("start_automated_benchmark", 20, 1)
 
 func _physics_process(delta: float) -> void:
 	if not is_episode_active:
@@ -120,7 +127,8 @@ func start_automated_benchmark(batch_size: int = 10, bot_mode: int = 1) -> void:
 	_reset_benchmark_state()
 	
 	# Accelerate simulation for rapid data collection
-	Engine.time_scale = 2.5
+	Engine.time_scale = 5.0
+	Engine.max_physics_steps_per_frame = int(Engine.time_scale) + 4
 	
 	# Configure Bot
 	if player_bot and player_bot.has_method("set_mode"):
@@ -140,8 +148,11 @@ func start_full_suite_benchmark(episodes_per_policy: int = 50) -> void:
 	
 	_reset_benchmark_state()
 	
-	# High speed for large batch collection
-	Engine.time_scale = 10.0
+	# High speed for large batch collection (e.g., 20x speed)
+	Engine.time_scale = 20.0
+	# Prevent physics throttling: Godot caps physics steps per render frame (default 8).
+	# At 60 FPS render and 60 FPS physics, 20x speed requires 20 physics steps per render frame.
+	Engine.max_physics_steps_per_frame = int(Engine.time_scale) + 4
 	
 	batch_target_episodes = episodes_per_policy
 	batch_current_index = 0
@@ -166,6 +177,8 @@ func _reset_benchmark_state() -> void:
 		"adaptive": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0}
 	}
 	adaptive_win_history.clear()
+	if fsm and fsm.has_node("AdaptiveLogic"):
+		fsm.get_node("AdaptiveLogic").reset_weights_for_new_policy()
 	if csv_logger and csv_logger.has_method("clear_csv"):
 		csv_logger.clear_csv()
 
@@ -176,6 +189,8 @@ func _run_next_batch_episode() -> void:
 			batch_bot_mode = suite_policies[current_suite_policy_idx]
 			batch_current_index = 0
 			adaptive_win_history.clear()
+			if fsm and fsm.has_node("AdaptiveLogic"):
+				fsm.get_node("AdaptiveLogic").reset_weights_for_new_policy()
 			if player_bot and player_bot.has_method("set_mode"):
 				player_bot.set_mode(batch_bot_mode)
 			print("\n-------------------------------------------------------")
@@ -193,13 +208,8 @@ func _run_next_batch_episode() -> void:
 	if fsm and fsm.has_node("AdaptiveLogic"):
 		var adaptive_logic = fsm.get_node("AdaptiveLogic")
 		adaptive_logic.is_adaptive_enabled = use_adaptive
-		if use_adaptive and adaptive_win_history.size() > 0:
-			var awins = 0
-			for w in adaptive_win_history:
-				if w: awins += 1
-			adaptive_logic.rolling_win_rate = float(awins) / adaptive_win_history.size()
-		else:
-			adaptive_logic.rolling_win_rate = 0.5
+		if use_adaptive and adaptive_logic.has_method("select_rule_for_episode"):
+			adaptive_logic.select_rule_for_episode()
 	
 	# PAIR-MATCHED SEED FOR REPRODUCIBILITY
 	# Ensure Basic and Adaptive face the exact same spawn variations and random rolls
@@ -289,6 +299,10 @@ func _conclude_episode(npc_won: bool, player_won: bool, outcome_reason: String) 
 		adaptive_win_history.append(npc_won)
 		if adaptive_win_history.size() > 5:
 			adaptive_win_history.pop_front()
+		if fsm and fsm.has_node("AdaptiveLogic"):
+			var adap = fsm.get_node("AdaptiveLogic")
+			if adap.has_method("evaluate_episode_result"):
+				adap.evaluate_episode_result(player_hits_taken, npc_hits_taken, npc_won)
 	
 	episode_history.append(episode_data)
 	
@@ -345,6 +359,10 @@ func _finish_batch_benchmark() -> void:
 	benchmark_completed.emit(summary)
 
 func open_evaluation_dashboard() -> void:
+	if DisplayServer.get_name() == "headless":
+		print("[SimulationRunner] Benchmark completed in headless mode. Quitting.")
+		get_tree().quit()
+		return
 	var dashboard_path: String = ProjectSettings.globalize_path("res://docs/dashboard.html")
 	print("[SimulationRunner] Automatically launching Evaluation Dashboard: %s" % dashboard_path)
 	OS.shell_open(dashboard_path)

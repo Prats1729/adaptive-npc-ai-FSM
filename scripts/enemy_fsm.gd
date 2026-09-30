@@ -6,12 +6,17 @@ extends Node
 # Core AI Decision-Making Component.
 # Evaluates sensory perception (player distance, entity health) each physics tick
 # and executes transparent, rule-based state transitions with clear explainability.
-# Supports both Basic FSM and Adaptive FSM behavioral modulation.
 #
-# DESIGN PRINCIPLE (Spronck et al., 2006):
-#   The Baseline FSM uses fixed thresholds and simple behaviors.
-#   The Adaptive FSM changes STRATEGY (hit-and-run, engagement timing,
-#   counter-strikes), not raw stats. Both share equal combat parameters.
+# Supports:
+# - BASIC FSM: Static baseline decision rules with fixed thresholds.
+# - ADAPTIVE FSM: Dynamic Scripting (Spronck et al., 2006) policy execution.
+#
+# States:
+#   IDLE   -> Holding position / scanning arena
+#   CHASE  -> Pursuing player (direct or tactical intercept)
+#   ATTACK -> Engaging in melee range (cadence, spacing, or whiff punish)
+#   FLEE   -> Disengaging toward arena center when health drops below threshold
+#   DEAD   -> NPC defeated
 # ==============================================================================
 
 signal state_changed(old_state_name: String, new_state_name: String, reason: String)
@@ -41,19 +46,19 @@ var attack_timer: float = 0.0
 var last_reason: String = "Simulation Initialized"
 var is_active: bool = true
 
-# Adaptive Hit-and-Run Kiting
-var hit_and_run_timer: float = 0.0
-var hit_and_run_active: bool = false
-var global_hit_and_run_cooldown: float = 0.0
-
+# Timing & stimulus tracking
 var idle_recovery_timer: float = 0.0
 var last_stimulus_usec: int = 0
+
+# Spacing ring for whiff-punish tactical maneuvering
+const WHIFF_SPACING_DISTANCE: float = 48.0
+const ARENA_CENTER: Vector2 = Vector2(576, 325)
 
 @onready var adaptive_logic: Node = $AdaptiveLogic if has_node("AdaptiveLogic") else null
 
 # Colors representing each state for visual feedback
 const STATE_COLORS = {
-	State.IDLE: Color(0.4, 0.9, 0.5),     # Emerald Green (Calm/Neutral)
+	State.IDLE: Color(0.4, 0.9, 0.5),     # Emerald Green (Neutral)
 	State.CHASE: Color(1.0, 0.82, 0.2),   # Golden Amber (Alert/Pursuing)
 	State.ATTACK: Color(1.0, 0.25, 0.25), # Crimson Red (Aggressive/Engaging)
 	State.FLEE: Color(0.2, 0.75, 1.0),    # Dodger Blue (Evasive/Retreating)
@@ -77,20 +82,11 @@ func _physics_process(delta: float) -> void:
 		if not enemy.player:
 			return
 
-	# Handle attack cooldown timer
+	# Handle attack cooldown
 	if attack_timer > 0.0:
 		attack_timer -= delta
-	
-	# Handle hit-and-run disengage timer and global cooldown
-	if global_hit_and_run_cooldown > 0.0:
-		global_hit_and_run_cooldown -= delta
-	
-	if hit_and_run_timer > 0.0:
-		hit_and_run_timer -= delta
-		if hit_and_run_timer <= 0.0:
-			hit_and_run_active = false
 
-	# Check for NPC death condition
+	# Check for NPC defeat
 	if enemy.current_health <= 0:
 		if current_state != State.DEAD:
 			change_state(State.DEAD, "Enemy health dropped to 0.")
@@ -101,27 +97,20 @@ func _physics_process(delta: float) -> void:
 	var distance_to_player: float = enemy.global_position.distance_to(player_pos)
 	var health_ratio: float = float(enemy.current_health) / float(enemy.max_health)
 	
-	# Send live telemetry to HUD / Event Log
 	emit_telemetry(distance_to_player, health_ratio)
 
 	# Global Transition Rule: Flee when health drops below retreat threshold
-	if health_ratio <= flee_health_ratio and current_state != State.FLEE and current_state != State.DEAD:
+	# Note: If active policy sets flee_health_ratio to 0.0 (e.g. STAND_AND_TRADE or WHIFF_PUNISH),
+	# retreat is disabled because running from a faster pursuer forfeits DPS.
+	if flee_health_ratio > 0.0 and health_ratio <= flee_health_ratio and current_state != State.FLEE and current_state != State.DEAD:
 		var threat_nearby = (current_state == State.ATTACK or current_state == State.CHASE or distance_to_player < safe_distance)
 		if threat_nearby:
-			var reason_text = ""
-			if adaptive_logic and adaptive_logic.is_adaptive_enabled and flee_health_ratio > adaptive_logic.BASE_FLEE_THRESHOLD + 0.02:
-				reason_text = "Adaptive Tactical Retreat: Aggression HIGH (%.2f) -> Threshold raised to %.0f%% (HP: %d/%d)" % [
-					adaptive_logic.player_aggression_score,
-					flee_health_ratio * 100.0,
-					enemy.current_health,
-					enemy.max_health
-				]
-			else:
-				reason_text = "Static Flee: Low Health (HP: %d/%d - %.0f%% <= %.0f%% threshold)" % [
-					enemy.current_health,
-					enemy.max_health,
-					health_ratio * 100.0,
-					flee_health_ratio * 100.0
+			var reason_text = "Retreat Threshold Reached: HP %d/%d (%.0f%% <= %.0f%%)" % [
+				enemy.current_health, enemy.max_health, health_ratio * 100.0, flee_health_ratio * 100.0
+			]
+			if adaptive_logic and adaptive_logic.is_adaptive_enabled:
+				reason_text = "Adaptive Tactical Disengage: %s (HP: %.0f%% <= %.0f%%)" % [
+					adaptive_logic.get_active_rule_name(), health_ratio * 100.0, flee_health_ratio * 100.0
 				]
 			change_state(State.FLEE, reason_text)
 			return
@@ -138,12 +127,14 @@ func _physics_process(delta: float) -> void:
 			_process_attack_state(distance_to_player)
 			
 		State.FLEE:
-			_process_flee_state(player_pos, distance_to_player, health_ratio)
+			_process_flee_state(player_pos, distance_to_player)
 			
 		State.DEAD:
 			enemy.stop_moving()
 
-# --- STATE ACTIONS & TRANSITION LOGIC ---
+# ==============================================================================
+# STATE EXECUTION & TACTICAL TRANSITIONS
+# ==============================================================================
 
 func _process_idle_state(distance: float) -> void:
 	if enemy.player:
@@ -153,167 +144,151 @@ func _process_idle_state(distance: float) -> void:
 	
 	idle_recovery_timer += get_physics_process_delta_time()
 	
-	# Transition 1: Player enters detection range
+	# Transition 1: Target enters detection range
 	if distance <= detection_range:
 		if last_stimulus_usec == 0:
 			notify_stimulus_received()
-		var extra_info = ""
-		if adaptive_logic and adaptive_logic.is_adaptive_enabled and detection_range > adaptive_logic.BASE_DETECTION_RANGE + 4.0:
-			extra_info = " [Adaptive Expansion: %dpx > base %dpx]" % [round(detection_range), round(adaptive_logic.BASE_DETECTION_RANGE)]
 		idle_recovery_timer = 0.0
-		change_state(
-			State.CHASE,
-			"Player entered detection range (Distance: %d px <= %d px)%s" % [round(distance), round(detection_range), extra_info]
-		)
+		var reason = "Player detected within range (Distance: %dpx <= %dpx)" % [round(distance), round(detection_range)]
+		if adaptive_logic and adaptive_logic.is_adaptive_enabled:
+			reason = "[%s] Target detected (%dpx <= %dpx)" % [
+				adaptive_logic.get_active_rule_name(), round(distance), round(detection_range)
+			]
+		change_state(State.CHASE, reason)
 		return
-	
-	# Transition 2: Recovery window complete -> Re-engage
-	if idle_recovery_timer >= 1.5 and enemy.current_health > int(enemy.max_health * flee_health_ratio):
-		idle_recovery_timer = 0.0
-		change_state(
-			State.CHASE,
-			"Recovery complete; resuming pursuit (Distance: %d px)" % round(distance)
-		)
+	# Remain in IDLE scanning until target enters detection range
 
 func _process_chase_state(target_pos: Vector2, distance: float) -> void:
 	var move_target = target_pos
 	var chase_speed = enemy.base_speed
+	var avoid = _get_enemy_boundary_avoidance()
 	
 	if adaptive_logic and adaptive_logic.is_adaptive_enabled:
-		# Adaptive Flanking: If player is aggressive, approach from an angle
-		if adaptive_logic.player_aggression_score > 0.45:
-			var dir_to_player = (target_pos - enemy.global_position).normalized()
-			var perp_strafe = Vector2(-dir_to_player.y, dir_to_player.x)
-			# Alternate strafe direction using time to avoid predictability
-			var strafe_sign = 1.0 if fmod(Time.get_ticks_msec() / 1000.0, 2.0) < 1.0 else -1.0
-			move_target = target_pos + perp_strafe * strafe_sign * 55.0
+		var rule_id = adaptive_logic.active_rule_id
 		
-		# Adaptive Engagement Timing: Sprint to close distance during player's cooldown
-		if adaptive_logic.player_in_cooldown and distance > attack_range and distance < detection_range:
-			chase_speed = enemy.base_speed * 1.35
-			last_reason = "Adaptive Timing: Exploiting player cooldown window to close distance"
+		match rule_id:
+			# Policy 1: WHIFF_PUNISH (Spacing bait against early swingers)
+			1:
+				if adaptive_logic.player_in_cooldown:
+					# Opponent is in recovery window -> Surge in to punish!
+					chase_speed = enemy.base_speed * 1.35
+					move_target = target_pos
+				else:
+					# Opponent weapon ready -> Maintain 48px spacing distance to bait early swing
+					var dir_away = (enemy.global_position - target_pos).normalized()
+					if distance < WHIFF_SPACING_DISTANCE:
+						# Backpedal away to keep spacing at ~48px
+						move_target = enemy.global_position + dir_away * 60.0
+						chase_speed = enemy.flee_speed
+					else:
+						# Hold position at spacing ring
+						move_target = target_pos + dir_away * WHIFF_SPACING_DISTANCE
+						chase_speed = enemy.base_speed * 0.8
+			
+			# Policy 3: PRESSURE_HUNT (Leading intercept against kiters)
+			3:
+				var player_vel = enemy.player.velocity if "velocity" in enemy.player else Vector2.ZERO
+				move_target = target_pos + player_vel * 0.35
+				chase_speed = enemy.base_speed * 1.15
+			
+			# Policy 2: TACTICAL_KITE (Arena center bias)
+			2:
+				var to_center = (ARENA_CENTER - enemy.global_position).normalized()
+				move_target = (target_pos + to_center * 40.0)
+			
+			# Policy 0: STAND_AND_TRADE (Direct relentless rush)
+			_:
+				move_target = target_pos
+	
+	# Apply boundary avoidance so the NPC never walks directly into corners
+	if avoid != Vector2.ZERO and distance > 100.0:
+		var steer_dir = (move_target - enemy.global_position).normalized() + avoid * 0.8
+		move_target = enemy.global_position + steer_dir.normalized() * 100.0
 	
 	enemy.move_towards_point(move_target, chase_speed)
 	
+	# Transitions out of Chase
 	if distance <= attack_range:
-		change_state(
-			State.ATTACK,
-			"Player entered attack range (Distance: %d px <= %d px)" % [round(distance), round(attack_range)]
-		)
-	elif distance > detection_range * 1.3:
-		change_state(
-			State.IDLE,
-			"Player escaped detection range (Distance: %d px > %d px)" % [round(distance), round(detection_range * 1.3)]
-		)
+		var attack_reason = "Entered melee attack range (Distance: %dpx <= %dpx)" % [round(distance), round(attack_range)]
+		if adaptive_logic and adaptive_logic.is_adaptive_enabled and adaptive_logic.active_rule_id == 1:
+			attack_reason = "Whiff Punish: Target in recovery window; striking!"
+		change_state(State.ATTACK, attack_reason)
+		if attack_timer <= 0.0:
+			_execute_attack()
+	elif distance > detection_range * 1.35:
+		change_state(State.IDLE, "Target moved beyond detection range (Distance: %dpx > %dpx)" % [
+			round(distance), round(detection_range * 1.35)
+		])
+
+func _execute_attack() -> void:
+	attack_timer = attack_cooldown_time
+	if enemy.has_method("trigger_attack_visual"):
+		enemy.trigger_attack_visual()
+	if enemy.player and enemy.player.has_method("take_damage"):
+		enemy.player.take_damage(attack_damage)
+
+func _process_attack_state(distance: float) -> void:
+	var is_whiff_punish = (adaptive_logic and adaptive_logic.is_adaptive_enabled and adaptive_logic.active_rule_id == 1)
+	
+	if enemy.player:
+		if is_whiff_punish:
+			if attack_timer <= 0.0 and distance <= attack_range:
+				_execute_attack()
+				# Immediately disengage back to spacing ring
+				var dir_away = (enemy.global_position - enemy.player.global_position).normalized()
+				enemy.move_towards_point(enemy.global_position + dir_away * 60.0, enemy.flee_speed)
+			elif attack_timer > 0.0:
+				# On cooldown after strike: disengage to spacing ring (48px)
+				var dir_away = (enemy.global_position - enemy.player.global_position).normalized()
+				enemy.move_towards_point(enemy.global_position + dir_away * 60.0, enemy.flee_speed)
+		else:
+			if distance > attack_range * 0.7:
+				enemy.move_towards_point(enemy.player.global_position, enemy.base_speed * 0.8)
+			else:
+				enemy.stop_moving(enemy.player.global_position)
+			
+			if attack_timer <= 0.0 and distance <= attack_range:
+				_execute_attack()
+	else:
+		enemy.stop_moving()
+	
+	# Transition out if opponent retreats outside strike range
+	if distance > attack_range * 1.35:
+		change_state(State.CHASE, "Target disengaged outside attack range (%dpx > %dpx)" % [
+			round(distance), round(attack_range * 1.35)
+		])
+
+func _process_flee_state(player_pos: Vector2, distance: float) -> void:
+	var flee_direction = (enemy.global_position - player_pos).normalized()
+	var avoid = _get_enemy_boundary_avoidance()
+	var to_center = (ARENA_CENTER - enemy.global_position).normalized()
+	
+	# Arena-Aware Steering: prioritize open arena space over running into a corner
+	var final_flee_dir = (flee_direction * 0.4 + avoid * 0.6 + to_center * 0.4).normalized()
+	var flee_target = enemy.global_position + final_flee_dir * 150.0
+	
+	enemy.move_towards_point(flee_target, enemy.flee_speed)
+	
+	# Transition: Established safe distance
+	if distance >= safe_distance * 1.15:
+		change_state(State.IDLE, "Established safe distance (%dpx >= %dpx); entering recovery" % [
+			round(distance), round(safe_distance * 1.15)
+		])
+
+# ==============================================================================
+# ARENA STEERING & EXPLAINABILITY
+# ==============================================================================
 
 func _get_enemy_boundary_avoidance() -> Vector2:
 	if not enemy:
 		return Vector2.ZERO
 	var pos = enemy.global_position
 	var steer = Vector2.ZERO
-	if pos.x < 120.0: steer.x += 1.0
-	elif pos.x > 1030.0: steer.x -= 1.0
-	if pos.y < 120.0: steer.y += 1.0
-	elif pos.y > 530.0: steer.y -= 1.0
+	if pos.x < 130.0: steer.x += 1.0
+	elif pos.x > 1020.0: steer.x -= 1.0
+	if pos.y < 130.0: steer.y += 1.0
+	elif pos.y > 520.0: steer.y -= 1.0
 	return steer.normalized()
-
-func _process_attack_state(distance: float) -> void:
-	# --- ADAPTIVE HIT-AND-RUN KITING ---
-	# After landing a strike against an aggressive player, briefly disengage
-	# to avoid standing in a slug-fest the NPC would lose (equal DPS, player is faster)
-	if adaptive_logic and adaptive_logic.is_adaptive_enabled and hit_and_run_active:
-		if enemy.player:
-			var away_dir = (enemy.global_position - enemy.player.global_position).normalized()
-			var avoid = _get_enemy_boundary_avoidance()
-			var disengage_dir = away_dir
-			if avoid != Vector2.ZERO:
-				disengage_dir = (away_dir * 0.5 + avoid * 0.7).normalized()
-			
-			# Hit-and-run requires burst of speed to escape player's reach
-			enemy.move_towards_point(enemy.global_position + disengage_dir * 100.0, enemy.flee_speed)
-		
-		# If we've created enough distance, transition back to chase for re-engagement
-		if distance > attack_range * 1.8:
-			hit_and_run_active = false
-			change_state(
-				State.CHASE,
-				"Adaptive Hit-and-Run: Disengaged after strike, repositioning (Distance: %dpx)" % round(distance)
-			)
-		return
-	
-	# --- NORMAL ATTACK BEHAVIOR ---
-	if enemy.player:
-		if distance > attack_range * 0.75:
-			enemy.move_towards_point(enemy.player.global_position, enemy.base_speed * 0.8)
-		else:
-			enemy.stop_moving(enemy.player.global_position)
-	else:
-		enemy.stop_moving()
-	
-	# Execute attack when cooldown expires
-	if attack_timer <= 0.0:
-		attack_timer = attack_cooldown_time
-		if enemy.has_method("trigger_attack_visual"):
-			enemy.trigger_attack_visual()
-		if enemy.player and enemy.player.has_method("take_damage"):
-			enemy.player.take_damage(attack_damage)
-		
-		# Adaptive: Initiate hit-and-run kiting against aggressive players (Balanced Mode: limited to once per 3s, disabled if winning)
-		if adaptive_logic and adaptive_logic.is_adaptive_enabled and adaptive_logic.player_aggression_score > 0.40:
-			if global_hit_and_run_cooldown <= 0.0 and adaptive_logic.rolling_win_rate <= 0.65:
-				hit_and_run_active = true
-				hit_and_run_timer = 0.50  # Brief disengage window after striking
-				global_hit_and_run_cooldown = 3.0
-				last_reason = "Adaptive Hit-and-Run: Struck target, disengaging to avoid trade (Aggression: %.2f)" % adaptive_logic.player_aggression_score
-	
-	# Transition out if player moves away
-	if distance > attack_range * 1.3:
-		change_state(
-			State.CHASE,
-			"Player moved outside attack range (Distance: %d px > %d px)" % [round(distance), round(attack_range * 1.3)]
-		)
-
-func _process_flee_state(player_pos: Vector2, distance: float, _health_ratio: float) -> void:
-	# === ADAPTIVE-ONLY BEHAVIORS ===
-	if adaptive_logic and adaptive_logic.is_adaptive_enabled and enemy.player:
-		# Adaptive Counter-Offensive: If the NPC has equal or more HP, turn and fight!
-		if enemy.player.current_health <= enemy.current_health:
-			var target_state = State.ATTACK if distance <= attack_range else State.CHASE
-			change_state(
-				target_state,
-				"Adaptive Counter-Offensive: Target not stronger (Player HP: %d <= NPC HP: %d); engaging." % [
-					enemy.player.current_health, enemy.current_health
-				]
-			)
-			return
-		
-		# Balanced Mode: Counter-strikes while fleeing are disabled.
-		pass
-	
-	# === FLEE MOVEMENT (Both Basic and Adaptive) ===
-	var flee_direction = (enemy.global_position - player_pos).normalized()
-	var avoid = _get_enemy_boundary_avoidance()
-	
-	var final_flee_dir = flee_direction
-	if avoid != Vector2.ZERO:
-		# Adaptive: Use more lateral/perpendicular movement to avoid corners
-		if adaptive_logic and adaptive_logic.is_adaptive_enabled:
-			var perp = Vector2(-flee_direction.y, flee_direction.x)
-			final_flee_dir = (flee_direction * 0.3 + avoid * 0.5 + perp * 0.3).normalized()
-		else:
-			final_flee_dir = (flee_direction * 0.4 + avoid * 0.8).normalized()
-	
-	var flee_target = enemy.global_position + final_flee_dir * 150.0
-	enemy.move_towards_point(flee_target, enemy.flee_speed)
-	
-	# Transition: Reached safe distance
-	if distance >= safe_distance:
-		change_state(
-			State.IDLE,
-			"Established safe distance from player (Distance: %d px >= %d px)" % [round(distance), round(safe_distance)]
-		)
-
-# --- EXPLAINABILITY & STATE SWITCHING ---
 
 func change_state(new_state: State, reason: String) -> void:
 	if current_state == new_state:
@@ -331,13 +306,7 @@ func change_state(new_state: State, reason: String) -> void:
 	last_reason = reason
 	
 	print("[FSM] %s -> %s | Reason: %s" % [old_state_name, new_state_name, reason])
-	
 	current_state = new_state
-	
-	# Reset hit-and-run on state change
-	if new_state != State.ATTACK:
-		hit_and_run_active = false
-		hit_and_run_timer = 0.0
 	
 	if enemy:
 		enemy.update_visual_state(new_state_name, get_state_color(new_state), reason)
@@ -361,10 +330,7 @@ func get_state_color(state: State) -> Color:
 func emit_telemetry(distance: float, health_ratio: float) -> void:
 	var active_reason = last_reason
 	if adaptive_logic and adaptive_logic.is_adaptive_enabled:
-		if current_state == State.IDLE and detection_range > adaptive_logic.BASE_DETECTION_RANGE + 4.0:
-			active_reason = adaptive_logic.current_adaptive_explanation
-		elif current_state == State.ATTACK and adaptive_logic.player_aggression_score > 0.5:
-			active_reason = adaptive_logic.current_adaptive_explanation
+		active_reason = adaptive_logic.current_adaptive_explanation
 
 	var data = {
 		"state_name": get_state_name(current_state),
@@ -403,8 +369,6 @@ func reset_fsm() -> void:
 	attack_timer = 0.0
 	current_state = State.IDLE
 	idle_recovery_timer = 0.0
-	hit_and_run_active = false
-	hit_and_run_timer = 0.0
 	last_reason = "FSM reset to initial IDLE state."
 	if adaptive_logic and adaptive_logic.has_method("reset_adaptive_telemetry"):
 		adaptive_logic.reset_adaptive_telemetry()

@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ctuph3b4xg2ah"
+
+[deps]
+
+files=["res://Stored data/simulation_results1.system.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.npc.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.npc.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.npc.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.state.translation", "res://Stored data/simulation_results1.average.translation", "res://Stored data/simulation_results1.final.translation", "res://Stored data/simulation_results1.final.translation"]
+
+source_file="res://Stored data/simulation_results1.csv"
+dest_files=["res://Stored data/simulation_results1.system.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.npc.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.npc.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.npc.translation", "res://Stored data/simulation_results1.player.translation", "res://Stored data/simulation_results1.state.translation", "res://Stored data/simulation_results1.average.translation", "res://Stored data/simulation_results1.final.translation", "res://Stored data/simulation_results1.final.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true
