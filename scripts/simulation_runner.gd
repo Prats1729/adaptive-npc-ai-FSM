@@ -49,6 +49,7 @@ var stats = {
 	"adaptive": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0}
 }
 var episode_history: Array = []
+var adaptive_win_history: Array = []
 
 func _ready() -> void:
 	arena = get_parent() as Node2D
@@ -164,6 +165,7 @@ func _reset_benchmark_state() -> void:
 		"basic": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0},
 		"adaptive": {"trials": 0, "wins": 0, "losses": 0, "survival_sum": 0.0}
 	}
+	adaptive_win_history.clear()
 	if csv_logger and csv_logger.has_method("clear_csv"):
 		csv_logger.clear_csv()
 
@@ -173,6 +175,7 @@ func _run_next_batch_episode() -> void:
 			current_suite_policy_idx += 1
 			batch_bot_mode = suite_policies[current_suite_policy_idx]
 			batch_current_index = 0
+			adaptive_win_history.clear()
 			if player_bot and player_bot.has_method("set_mode"):
 				player_bot.set_mode(batch_bot_mode)
 			print("\n-------------------------------------------------------")
@@ -190,6 +193,13 @@ func _run_next_batch_episode() -> void:
 	if fsm and fsm.has_node("AdaptiveLogic"):
 		var adaptive_logic = fsm.get_node("AdaptiveLogic")
 		adaptive_logic.is_adaptive_enabled = use_adaptive
+		if use_adaptive and adaptive_win_history.size() > 0:
+			var awins = 0
+			for w in adaptive_win_history:
+				if w: awins += 1
+			adaptive_logic.rolling_win_rate = float(awins) / adaptive_win_history.size()
+		else:
+			adaptive_logic.rolling_win_rate = 0.5
 	
 	# PAIR-MATCHED SEED FOR REPRODUCIBILITY
 	# Ensure Basic and Adaptive face the exact same spawn variations and random rolls
@@ -274,6 +284,11 @@ func _conclude_episode(npc_won: bool, player_won: bool, outcome_reason: String) 
 	else:
 		stats[stat_key]["losses"] += 1
 		stats[stat_key]["survival_sum"] += episode_elapsed_time
+	
+	if is_adaptive:
+		adaptive_win_history.append(npc_won)
+		if adaptive_win_history.size() > 5:
+			adaptive_win_history.pop_front()
 	
 	episode_history.append(episode_data)
 	

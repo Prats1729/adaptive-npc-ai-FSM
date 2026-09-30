@@ -45,6 +45,10 @@ var passive_distance_timer: float = 0.0
 # Engagement Timing: True when the player just attacked and is in cooldown
 var player_in_cooldown: bool = false
 
+var rolling_win_rate: float = 0.5
+var reaction_delay_timer: float = 0.0
+var queued_spikes: int = 0
+
 var current_adaptive_explanation: String = "Monitoring player behavior..."
 
 func _ready() -> void:
@@ -55,6 +59,12 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not enemy or not fsm:
 		return
+	
+	if queued_spikes > 0:
+		reaction_delay_timer -= delta
+		if reaction_delay_timer <= 0.0:
+			player_aggression_score = min(1.0, player_aggression_score + 0.30 * queued_spikes)
+			queued_spikes = 0
 	
 	time_since_last_player_attack += delta
 	
@@ -84,12 +94,8 @@ func _physics_process(delta: float) -> void:
 	# --- ADAPTIVE THRESHOLD MODULATION ---
 	
 	# Rule 1: Adaptive Retreat Threshold
-	# If the player is highly aggressive and faster than our base speed, fleeing is futile (we just take hits in the back).
-	# Instead of fleeing earlier, a smart adaptive entity realizes it cannot escape and commits to a "Last Stand".
-	if player_aggression_score > 0.65:
-		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, 0.0, delta * 3.0) # Fight to the death
-	elif player_aggression_score > 0.35:
-		# Moderate aggression: try to flee slightly earlier before they burst us down
+	# Moderate aggression: try to flee slightly earlier before they burst us down
+	if player_aggression_score > 0.35:
 		var flee_boost = lerp(BASE_FLEE_THRESHOLD, MAX_ADAPTIVE_FLEE_THRESHOLD, min(1.0, (player_aggression_score - 0.35) * 1.6))
 		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, flee_boost, delta * 2.5)
 	else:
@@ -106,12 +112,15 @@ func _physics_process(delta: float) -> void:
 		fsm.detection_range = lerp(fsm.detection_range, BASE_DETECTION_RANGE, delta * 2.0)
 	
 	# Dynamic explanation synthesis
-	if player_aggression_score > 0.65:
-		current_adaptive_explanation = "Adaptive: Extreme aggression (%.2f) -> Escape impossible. Last Stand active!" % player_aggression_score
-	elif player_aggression_score > 0.35:
-		current_adaptive_explanation = "Adaptive: High aggression (%.2f) -> Flee at %.0f%%, Hit-and-Run active" % [
-			player_aggression_score, fsm.flee_health_ratio * 100.0
-		]
+	if player_aggression_score > 0.35:
+		if rolling_win_rate > 0.65:
+			current_adaptive_explanation = "Adaptive: High aggression (%.2f) -> Flee at %.0f%%. (H&R Disabled due to >65%% Win Rate)" % [
+				player_aggression_score, fsm.flee_health_ratio * 100.0
+			]
+		else:
+			current_adaptive_explanation = "Adaptive: High aggression (%.2f) -> Flee at %.0f%%, Hit-and-Run active" % [
+				player_aggression_score, fsm.flee_health_ratio * 100.0
+			]
 	elif passive_distance_timer > 3.0 and fsm.detection_range > BASE_DETECTION_RANGE + 3.0:
 		current_adaptive_explanation = "Adaptive: Target passive for %.1fs -> Detection expanded to %dpx" % [
 			passive_distance_timer, round(fsm.detection_range)
@@ -127,8 +136,9 @@ func _physics_process(delta: float) -> void:
 # Called whenever the player swings or attacks
 func record_player_attack() -> void:
 	time_since_last_player_attack = 0.0
-	# Spike aggression score (+0.30 per strike, capped at 1.0)
-	player_aggression_score = min(1.0, player_aggression_score + 0.30)
+	queued_spikes += 1
+	if reaction_delay_timer <= 0.0:
+		reaction_delay_timer = randf_range(0.20, 0.35)
 
 func get_aggression_tier() -> String:
 	if player_aggression_score > 0.60:
@@ -151,6 +161,8 @@ func reset_adaptive_telemetry() -> void:
 	time_since_last_player_attack = 5.0
 	passive_distance_timer = 0.0
 	player_in_cooldown = false
+	queued_spikes = 0
+	reaction_delay_timer = 0.0
 	if fsm:
 		fsm.detection_range = BASE_DETECTION_RANGE
 		fsm.flee_health_ratio = BASE_FLEE_THRESHOLD

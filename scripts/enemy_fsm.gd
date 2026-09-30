@@ -44,6 +44,7 @@ var is_active: bool = true
 # Adaptive Hit-and-Run Kiting
 var hit_and_run_timer: float = 0.0
 var hit_and_run_active: bool = false
+var global_hit_and_run_cooldown: float = 0.0
 
 var idle_recovery_timer: float = 0.0
 var last_stimulus_usec: int = 0
@@ -80,7 +81,10 @@ func _physics_process(delta: float) -> void:
 	if attack_timer > 0.0:
 		attack_timer -= delta
 	
-	# Handle hit-and-run disengage timer
+	# Handle hit-and-run disengage timer and global cooldown
+	if global_hit_and_run_cooldown > 0.0:
+		global_hit_and_run_cooldown -= delta
+	
 	if hit_and_run_timer > 0.0:
 		hit_and_run_timer -= delta
 		if hit_and_run_timer <= 0.0:
@@ -254,11 +258,13 @@ func _process_attack_state(distance: float) -> void:
 		if enemy.player and enemy.player.has_method("take_damage"):
 			enemy.player.take_damage(attack_damage)
 		
-		# Adaptive: Initiate hit-and-run kiting against aggressive players
+		# Adaptive: Initiate hit-and-run kiting against aggressive players (Balanced Mode: limited to once per 3s, disabled if winning)
 		if adaptive_logic and adaptive_logic.is_adaptive_enabled and adaptive_logic.player_aggression_score > 0.40:
-			hit_and_run_active = true
-			hit_and_run_timer = 0.50  # Brief disengage window after striking
-			last_reason = "Adaptive Hit-and-Run: Struck target, disengaging to avoid trade (Aggression: %.2f)" % adaptive_logic.player_aggression_score
+			if global_hit_and_run_cooldown <= 0.0 and adaptive_logic.rolling_win_rate <= 0.65:
+				hit_and_run_active = true
+				hit_and_run_timer = 0.50  # Brief disengage window after striking
+				global_hit_and_run_cooldown = 3.0
+				last_reason = "Adaptive Hit-and-Run: Struck target, disengaging to avoid trade (Aggression: %.2f)" % adaptive_logic.player_aggression_score
 	
 	# Transition out if player moves away
 	if distance > attack_range * 1.3:
@@ -281,23 +287,8 @@ func _process_flee_state(player_pos: Vector2, distance: float, _health_ratio: fl
 			)
 			return
 		
-		# Adaptive Retaliatory Counter-Strike: Punish reckless chasers in melee range
-		if distance <= attack_range and attack_timer <= 0.0:
-			attack_timer = attack_cooldown_time
-			if enemy.has_method("trigger_attack_visual"):
-				enemy.trigger_attack_visual()
-			if enemy.player.has_method("take_damage"):
-				enemy.player.take_damage(attack_damage)
-				last_reason = "Adaptive Counter-Strike: Punished pursuer at %dpx" % round(distance)
-				# Check if this strike gave us the HP lead (or equalized it)
-				if enemy.player.current_health <= enemy.current_health:
-					change_state(
-						State.ATTACK,
-						"Adaptive Counter-Offensive: Counter-strike equalized/seized HP lead (Player: %d <= NPC: %d); turning to fight." % [
-							enemy.player.current_health, enemy.current_health
-						]
-					)
-					return
+		# Balanced Mode: Counter-strikes while fleeing are disabled.
+		pass
 	
 	# === FLEE MOVEMENT (Both Basic and Adaptive) ===
 	var flee_direction = (enemy.global_position - player_pos).normalized()
