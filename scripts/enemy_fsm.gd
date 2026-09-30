@@ -17,6 +17,7 @@ extends Node
 signal state_changed(old_state_name: String, new_state_name: String, reason: String)
 signal telemetry_updated(telemetry_data: Dictionary)
 signal mode_toggled(is_adaptive: bool)
+signal response_time_measured(time_sec: float)
 
 enum State {
 	IDLE,
@@ -28,7 +29,7 @@ enum State {
 
 @export_group("FSM Decision Thresholds")
 @export var detection_range: float = 200.0
-@export var attack_range: float = 45.0
+@export var attack_range: float = 35.0
 @export var safe_distance: float = 250.0
 @export var flee_health_ratio: float = 0.25 # 25% max health
 @export var attack_damage: int = 12
@@ -223,10 +224,12 @@ func _process_attack_state(distance: float) -> void:
 			var disengage_dir = away_dir
 			if avoid != Vector2.ZERO:
 				disengage_dir = (away_dir * 0.5 + avoid * 0.7).normalized()
-			enemy.move_towards_point(enemy.global_position + disengage_dir * 100.0, enemy.base_speed * 1.1)
+			
+			# Hit-and-run requires burst of speed to escape player's reach
+			enemy.move_towards_point(enemy.global_position + disengage_dir * 100.0, enemy.flee_speed)
 		
 		# If we've created enough distance, transition back to chase for re-engagement
-		if distance > attack_range * 1.6:
+		if distance > attack_range * 1.8:
 			hit_and_run_active = false
 			change_state(
 				State.CHASE,
@@ -267,12 +270,12 @@ func _process_attack_state(distance: float) -> void:
 func _process_flee_state(player_pos: Vector2, distance: float, _health_ratio: float) -> void:
 	# === ADAPTIVE-ONLY BEHAVIORS ===
 	if adaptive_logic and adaptive_logic.is_adaptive_enabled and enemy.player:
-		# Adaptive Counter-Offensive: If the NPC has more HP, turn and fight!
-		if enemy.player.current_health < enemy.current_health:
+		# Adaptive Counter-Offensive: If the NPC has equal or more HP, turn and fight!
+		if enemy.player.current_health <= enemy.current_health:
 			var target_state = State.ATTACK if distance <= attack_range else State.CHASE
 			change_state(
 				target_state,
-				"Adaptive Counter-Offensive: Target weaker (Player HP: %d < NPC HP: %d); engaging." % [
+				"Adaptive Counter-Offensive: Target not stronger (Player HP: %d <= NPC HP: %d); engaging." % [
 					enemy.player.current_health, enemy.current_health
 				]
 			)
@@ -286,11 +289,11 @@ func _process_flee_state(player_pos: Vector2, distance: float, _health_ratio: fl
 			if enemy.player.has_method("take_damage"):
 				enemy.player.take_damage(attack_damage)
 				last_reason = "Adaptive Counter-Strike: Punished pursuer at %dpx" % round(distance)
-				# Check if this strike gave us the HP lead
-				if enemy.player.current_health < enemy.current_health:
+				# Check if this strike gave us the HP lead (or equalized it)
+				if enemy.player.current_health <= enemy.current_health:
 					change_state(
 						State.ATTACK,
-						"Adaptive Counter-Offensive: Counter-strike seized HP lead (Player: %d < NPC: %d); turning to fight." % [
+						"Adaptive Counter-Offensive: Counter-strike equalized/seized HP lead (Player: %d <= NPC: %d); turning to fight." % [
 							enemy.player.current_health, enemy.current_health
 						]
 					)

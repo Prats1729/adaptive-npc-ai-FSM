@@ -140,7 +140,7 @@ func start_full_suite_benchmark(episodes_per_policy: int = 50) -> void:
 	_reset_benchmark_state()
 	
 	# High speed for large batch collection
-	Engine.time_scale = 6.0
+	Engine.time_scale = 10.0
 	
 	batch_target_episodes = episodes_per_policy
 	batch_current_index = 0
@@ -150,7 +150,7 @@ func start_full_suite_benchmark(episodes_per_policy: int = 50) -> void:
 		player_bot.set_mode(batch_bot_mode)
 	
 	print("\n=======================================================")
-	print("[FULL SUITE BENCHMARK STARTED] %d games on each of 3 bot policies (Total %d games) at 6.0x speed..." % [
+	print("[FULL SUITE BENCHMARK STARTED] %d games on each of 3 bot policies (Total %d games) at 10.0x speed..." % [
 		episodes_per_policy, episodes_per_policy * 3
 	])
 	print("=======================================================\n")

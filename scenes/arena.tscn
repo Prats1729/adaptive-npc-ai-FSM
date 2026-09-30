@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://jqvpjvgqg6w5"]
 
 [ext_resource type="Script" uid="uid://ctiysp7ucfs57" path="res://scripts/arena.gd" id="1_olpmc"]
-[ext_resource type="Script" uid="uid://bv8w7v2w86l1q" path="res://scripts/arena_map.gd" id="2_arena_map"]
+[ext_resource type="Script" uid="uid://oyxnkm8uh1dj" path="res://scripts/arena_map.gd" id="2_arena_map"]
 [ext_resource type="PackedScene" uid="uid://x0pv8aasw4v8" path="res://scenes/player.tscn" id="3_e05a3"]
 [ext_resource type="PackedScene" uid="uid://lrlmfejpbkt7" path="res://scenes/enemy_npc.tscn" id="4_wl4x5"]
-[ext_resource type="Script" path="res://scripts/simulation_runner.gd" id="5_sim_runner"]
+[ext_resource type="Script" uid="uid://ctfnwivjhn0oy" path="res://scripts/simulation_runner.gd" id="5_sim_runner"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_top"]
 size = Vector2(1100, 20)
@@ -21,7 +21,15 @@ size = Vector2(20, 520)
 [sub_resource type="CircleShape2D" id="CircleShape2D_pillar"]
 radius = 24.0
 
+[sub_resource type="Environment" id="Environment_eo7yt"]
+background_mode = 3
+glow_enabled = true
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_card"]
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
 bg_color = Color(0.08, 0.09, 0.13, 0.85)
 border_width_left = 1
 border_width_top = 1
@@ -32,10 +40,13 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-content_margin_left = 14.0
-content_margin_top = 8.0
-content_margin_right = 14.0
-content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+bg_color = Color(0.05, 0.05, 0.08, 0.95)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_hp"]
 bg_color = Color(0.2, 0.75, 0.35, 1)
@@ -51,17 +62,6 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
-bg_color = Color(0.05, 0.05, 0.08, 0.95)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="Environment" id="Environment_eo7yt"]
-background_mode = 3
-glow_enabled = true
-
 [node name="Arena" type="Node2D" unique_id=635482318]
 script = ExtResource("1_olpmc")
 
@@ -72,7 +72,6 @@ color = Color(0.08, 0.09, 0.12, 1)
 
 [node name="ArenaMap" type="Node2D" parent="." unique_id=1469901883]
 script = ExtResource("2_arena_map")
-show_perception_zones = false
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1800397950]
 
@@ -252,4 +251,4 @@ text = "[WASD/Space] Move/Attack  |  [T] Toggle AI  |  [M] Cycle Bot  |  [B] 10-
 
 [node name="SimulationRunner" type="Node" parent="." unique_id=987654350]
 script = ExtResource("5_sim_runner")
-
+episodes_per_batch = 30

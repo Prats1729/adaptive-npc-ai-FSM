@@ -83,8 +83,13 @@ func _physics_process(delta: float) -> void:
 	
 	# --- ADAPTIVE THRESHOLD MODULATION ---
 	
-	# Rule 1: High Aggression -> Increase retreat threshold (flee earlier to create distance)
-	if player_aggression_score > 0.35:
+	# Rule 1: Adaptive Retreat Threshold
+	# If the player is highly aggressive and faster than our base speed, fleeing is futile (we just take hits in the back).
+	# Instead of fleeing earlier, a smart adaptive entity realizes it cannot escape and commits to a "Last Stand".
+	if player_aggression_score > 0.65:
+		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, 0.0, delta * 3.0) # Fight to the death
+	elif player_aggression_score > 0.35:
+		# Moderate aggression: try to flee slightly earlier before they burst us down
 		var flee_boost = lerp(BASE_FLEE_THRESHOLD, MAX_ADAPTIVE_FLEE_THRESHOLD, min(1.0, (player_aggression_score - 0.35) * 1.6))
 		fsm.flee_health_ratio = lerp(fsm.flee_health_ratio, flee_boost, delta * 2.5)
 	else:
@@ -101,7 +106,9 @@ func _physics_process(delta: float) -> void:
 		fsm.detection_range = lerp(fsm.detection_range, BASE_DETECTION_RANGE, delta * 2.0)
 	
 	# Dynamic explanation synthesis
-	if player_aggression_score > 0.5:
+	if player_aggression_score > 0.65:
+		current_adaptive_explanation = "Adaptive: Extreme aggression (%.2f) -> Escape impossible. Last Stand active!" % player_aggression_score
+	elif player_aggression_score > 0.35:
 		current_adaptive_explanation = "Adaptive: High aggression (%.2f) -> Flee at %.0f%%, Hit-and-Run active" % [
 			player_aggression_score, fsm.flee_health_ratio * 100.0
 		]
