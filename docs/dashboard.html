@@ -333,7 +333,7 @@
       <!-- Figure 1: Convergence Trajectory vs Literature Benchmark -->
       <div class="chart-panel">
         <div class="panel-header">
-          <h2>Figure 1: Win-Rate Trajectory vs. Internal Experimental Results</h2>
+          <h2>Figure 1: Win-Rate Trajectory</h2>
           <div style="display: flex; gap: 0.35rem; align-items: center;">
             <button class="pill-btn active" id="filterAll" onclick="setChartFilter('ALL')">All</button>
             <button class="pill-btn" id="filterAgg" onclick="setChartFilter('Aggressive')">Aggressive</button>
@@ -429,16 +429,6 @@
       data: {
         labels: Array.from({length: 20}, (_, i) => `Ep ${i + 1}`),
         datasets: [
-          {
-            label: 'Internal Reference (Baseline)',
-            data: spronckBase,
-            borderColor: '#818cf8',
-            borderWidth: 2,
-            borderDash: [5, 4],
-            pointRadius: 0,
-            fill: false,
-            tension: 0.3
-          },
           {
             label: 'Our Simulation: Adaptive FSM (Live)',
             data: [],
