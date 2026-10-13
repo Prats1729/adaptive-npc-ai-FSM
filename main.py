@@ -136,9 +136,17 @@ def main():
     parser.add_argument("--player", type=str, default="MaxMin", choices=["MaxMin", "SafetyGraph"], help="Player evasion policy")
     parser.add_argument("--train", action="store_true", help="Force re-training of Reinforcement Learning models")
     parser.add_argument("--open-dashboard", action="store_true", help="Open the HTML dashboard in default browser")
+    parser.add_argument("--ui", action="store_true", help="Launch interactive Stealth AI Benchmark Studio Web Server")
+    parser.add_argument("--port", type=int, default=8080, help="Port for the web studio server (default: 8080)")
     args = parser.parse_args()
 
     ensure_prerequisites()
+
+    if args.ui:
+        import server
+        server.start_server(port=args.port, open_browser=True)
+        return
+
     train_models_if_needed(force_train=args.train)
     run_benchmark(num_trials=args.trials, selected_map=args.map, player_mode=args.player, open_dashboard=args.open_dashboard)
 

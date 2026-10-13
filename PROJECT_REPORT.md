@@ -257,9 +257,10 @@ The project repository provides a complete, self-contained, reproducible codebas
 3. **Automated Unit Verification Suite:** [`tests/test_stealth_models.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/tests/test_stealth_models.py) (7/7 tests passing).
 4. **Persistent Trained Weight Models:** [`data/q_table_miami.json`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/q_table_miami.json) and [`data/q_table_test_maze.json`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/q_table_test_maze.json).
 5. **Raw Empirical Datasets:** [`data/benchmark_miami.csv`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/benchmark_miami.csv) and [`data/benchmark_test_maze.csv`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/benchmark_test_maze.csv).
-6. **Interactive Evaluation Dashboard:** [`docs/stealth_dashboard.html`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/docs/stealth_dashboard.html) (Modern dark-mode interface with Chart.js charts).
-7. **Complete Map Layouts (All 5 Levels):** [`maps/`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/maps/) (`miami.json`, `test_maze.json`, `arkham.json`, `tlou.json`, `dishonored.json`).
-8. **Engineering & Research Decision Log:** [`DECISION_LOG.md`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/DECISION_LOG.md).
+6. **Interactive Benchmark Studio & Live Tactical Visualizer:** [`ui/index.html`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/ui/index.html) powered by zero-dependency Python server [`server.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/server.py) (`python main.py --ui` or `python server.py --open`), featuring live 2D grid playback, raycasting LOS visualizer, dynamic multi-trial benchmarking, and rich Chart.js radar & bar metrics.
+7. **Legacy Evaluation Dashboard:** [`docs/stealth_dashboard.html`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/docs/stealth_dashboard.html).
+8. **Complete Map Layouts (All 5 Levels):** [`maps/`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/maps/) (`miami.json`, `test_maze.json`, `arkham.json`, `tlou.json`, `dishonored.json`).
+9. **Engineering & Research Decision Log:** [`DECISION_LOG.md`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/DECISION_LOG.md).
 
 ---
 

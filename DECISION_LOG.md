@@ -71,3 +71,17 @@
   - PI-PF: $CR = 0.70 (+14\%), CT = 38.03\text{s}$
   - APF-MCTS: $CR = 0.86 (+30\%), CT = 37.81\text{s}$
   - RL-Q: $CR = 0.92 (+36\%), CT = 27.93\text{s}$
+
+---
+
+## LOG ENTRY 6: INTERACTIVE BENCHMARK STUDIO & LIVE TACTICAL VISUALIZER
+* **Rationale:** Provide an intuitive, modern, high-aesthetic web interface for real-time testing, step-by-step 2D visual playback, and empirical data analytics beyond static HTML reports.
+* **Architecture:**
+  - Standard-library zero-dependency Python threaded HTTP server ([`server.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/server.py)).
+  - Single-page application studio ([`ui/index.html`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/ui/index.html)) with cyberpunk dark glassmorphic styling, neon cyan/emerald/purple accents, and JetBrains Mono typography.
+* **Key Interactive Features:**
+  1. **Live 2D Canvas Tactical Visualizer:** Real-time tilemap rendering with Bresenham guard line-of-sight rays, evasive player path tracing, playback scrubbing, and multi-speed controls (1x, 2x, 5x).
+  2. **Live Benchmark Runner:** Configure maps (Miami, Test Maze, Arkham, TLOU, Dishonored), trials per algorithm, and test models with instant progress tracking and table updates.
+  3. **Rich Chart.js Comparative Analytics:** Dynamic Capture Rate bar chart, Mean Capture Time bar chart, and 5-axis tactical performance radar chart (Capture Rate, Pursuit Speed, Coverage, Patrol Smoothness, Flanking Efficiency).
+  4. **CLI Integration:** Added `--ui` and `--port` flags to [`main.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/main.py) for one-line browser launching (`python main.py --ui`).
+
