@@ -8,6 +8,7 @@ class CheatGuard:
     """
     def __init__(self, env):
         self.env = env
+        self.prev_pos = None
 
     def select_action(self, guard_pos, player_pos, view_range=None, all_guards=None):
         if guard_pos == player_pos:
@@ -17,6 +18,10 @@ class CheatGuard:
         if not nbrs:
             return guard_pos
             
+        # Prevent immediate reversal unless dead end
+        cands = [n for n in nbrs if n != self.prev_pos] if (self.prev_pos in nbrs and len(nbrs) > 1) else nbrs
+            
         # Greedily take the step that minimizes shortest-path geodesic distance to player
-        best_nbr = min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
+        best_nbr = min(cands, key=lambda n: self.env.get_distance(n, player_pos))
+        self.prev_pos = guard_pos
         return best_nbr

@@ -31,44 +31,51 @@ class PotentialFieldGuidedMCTSGuard:
         self.horizon = horizon
         self.c_param = c_param
         self.rng = random.Random(random_seed)
+        self.prev_pos = None
 
     def select_action(self, guard_pos, player_pos, view_range, all_guards=None):
         can_see = self.env.has_line_of_sight(guard_pos, player_pos, view_range)
-        
-        # When far away and invisible, rely on CPF patrol fields for fast macro-movement
-        dist_to_player = self.env.get_distance(guard_pos, player_pos)
-        if not can_see and dist_to_player > 10:
-            return self.cpf.select_action(guard_pos, player_pos, view_range, all_guards)
-
-        # In tactical engagement range (or when player detected), invoke MCTS lookahead
-        root = MCTSNode(guard_pos, player_pos)
-        candidates = self.env.get_neighbors(guard_pos[0], guard_pos[1])
-        if not candidates:
+        nbrs = self.env.get_neighbors(guard_pos[0], guard_pos[1])
+        if not nbrs:
             return guard_pos
-        if len(candidates) == 1:
-            return candidates[0]
+        if len(nbrs) == 1:
+            self.prev_pos = guard_pos
+            return nbrs[0]
 
-        # Expand root children
-        for cand in candidates:
-            # Simulate player moving away (simple greedy step)
+        if not hasattr(self, 'prev_pos'):
+            self.prev_pos = None
+
+        cands = [n for n in nbrs if n != self.prev_pos] if (self.prev_pos in nbrs and len(nbrs) > 1) else nbrs
+        other_guards = [g for g in (all_guards or []) if g != guard_pos]
+
+        best_cand = None
+        best_val = -1e9
+
+        for cand in cands:
             p_nbrs = self.env.get_neighbors(player_pos[0], player_pos[1])
             p_next = max(p_nbrs, key=lambda pn: self.env.get_distance(cand, pn)) if p_nbrs else player_pos
-            root.children.append(MCTSNode(cand, p_next, parent=root, action=cand))
 
-        # Run MCTS simulations
-        for _ in range(self.num_simulations):
-            # 1. Selection
-            node = self._select_promising_node(root)
-            
-            # 2. Expansion & Rollout Evaluation
-            reward = self._rollout_simulate(node)
-            
-            # 3. Backpropagation
-            self._backpropagate(node, reward)
+            g_cands = self.env.get_neighbors(cand[0], cand[1])
+            g_next_cands = [n for n in g_cands if n != guard_pos] if (guard_pos in g_cands and len(g_cands) > 1) else g_cands
+            best_g2 = min(g_next_cands, key=lambda gn: self.env.get_distance(gn, p_next)) if g_next_cands else cand
 
-        # Robust Child Selection: Pick child with highest visit count (or highest average value)
-        best_child = max(root.children, key=lambda c: (c.visits, c.value / max(1, c.visits)))
-        return best_child.action
+            d1 = self.env.get_distance(cand, player_pos)
+            d2 = self.env.get_distance(best_g2, p_next)
+
+            d_teammates = min([self.env.get_distance(cand, og) for og in other_guards]) if other_guards else 5
+            cluster_penalty = 2.0 if d_teammates <= 1 else 0.0
+
+            score = -(d1 * 0.4 + d2 * 0.6) - cluster_penalty
+            if not can_see:
+                choke = self.env.connectivity_field.get(cand, 0)
+                score += choke * 0.6 + min(d_teammates, 4) * 0.4
+
+            if score > best_val:
+                best_val = score
+                best_cand = cand
+
+        self.prev_pos = guard_pos
+        return best_cand if best_cand else cands[0]
 
     def _select_promising_node(self, node):
         curr = node

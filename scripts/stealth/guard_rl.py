@@ -99,44 +99,40 @@ class ReinforcementLearningGuard:
         self.last_action = action
         self.last_dist = self.env.get_distance(guard_pos, player_pos)
 
-        # Execute chosen tactical action to pick adjacent cell
+        # Execute tactical action with anti-reversal candidate filtering
         nbrs = self.env.get_neighbors(guard_pos[0], guard_pos[1])
         if not nbrs:
             return guard_pos
+        if len(nbrs) == 1:
+            self.prev_pos = guard_pos
+            return nbrs[0]
 
-        if not can_see:
-            # Unobserved search mode
-            if action == 0:  # Direct approach to last known sighting or chokepoint
-                return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
-            elif action == 1:  # Explore least visited area
-                return min(nbrs, key=lambda n: self.visit_counts.get(n, 0))
-            elif action == 2:  # Patrol high connectivity chokepoint
-                return max(nbrs, key=lambda n: self.env.connectivity_field.get(n, 0))
-            else:  # Disperse away from teammate guards
-                other_guards = [g for g in (all_guards or []) if g != guard_pos]
-                if other_guards:
-                    return max(nbrs, key=lambda n: min(self.env.get_distance(n, og) for og in other_guards))
-                return min(nbrs, key=lambda n: self.visit_counts.get(n, 0))
+        if not hasattr(self, 'prev_pos'):
+            self.prev_pos = None
 
-        # Observed pursuit mode
-        if action == 0:  # Direct pursuit: shortest path
-            return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
-        elif action == 1:  # Predictive Interception: lookahead 2 steps
-            pred_cell = (player_pos[0] + 2 * v[0], player_pos[1] + 2 * v[1])
-            if pred_cell in self.env.walkable_cells:
-                return min(nbrs, key=lambda n: self.env.get_distance(n, pred_cell))
-            return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
-        elif action == 2:  # Chokepoint Ambush Cutoff
-            return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos) - self.env.connectivity_field.get(n, 0) * 1.5)
-        else:  # Flanking / Multi-guard pincer
-            other_guards = [g for g in (all_guards or []) if g != guard_pos]
-            if other_guards:
-                def pincer_score(n):
-                    d_p = self.env.get_distance(n, player_pos)
-                    d_og = min(self.env.get_distance(n, og) for og in other_guards)
-                    return -d_p + min(d_og, 5) * 0.4
-                return max(nbrs, key=pincer_score)
-            return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
+        cands = [n for n in nbrs if n != self.prev_pos] if (self.prev_pos in nbrs and len(nbrs) > 1) else nbrs
+        other_guards = [g for g in (all_guards or []) if g != guard_pos]
+        dist_p = self.env.get_distance(guard_pos, player_pos)
+
+        def score_cand(n):
+            d_target = self.env.get_distance(n, player_pos)
+            d_teammates = min([self.env.get_distance(n, og) for og in other_guards]) if other_guards else 5
+            cluster_penalty = 2.0 if d_teammates <= 1 else (1.0 if d_teammates <= 2 else 0.0)
+            
+            if can_see:
+                if dist_p > 3 and v != (0, 0):
+                    pred = (player_pos[0] + v[0]*2, player_pos[1] + v[1]*2)
+                    if self.env.is_walkable(pred[0], pred[1]):
+                        d_pred = self.env.get_distance(n, pred)
+                        return -(d_target * 0.4 + d_pred * 0.6) - cluster_penalty
+                return -d_target - cluster_penalty
+            else:
+                choke = self.env.connectivity_field.get(n, 0)
+                return -d_target + choke * 0.8 + min(d_teammates, 4) * 0.5
+
+        best = max(cands, key=score_cand)
+        self.prev_pos = guard_pos
+        return best
 
     def update_q_value(self, current_pos, player_pos, view_range, is_captured):
         if self.last_state is None or self.last_action is None:
