@@ -20,14 +20,15 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 class StealthAPIHandler(BaseHTTPRequestHandler):
     def end_headers(self):
-        # Enable CORS for local development
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept')
         super().end_headers()
 
     def do_OPTIONS(self):
         self.send_response(200)
+        self.send_header('Content-Type', 'text/plain')
+        self.send_header('Content-Length', '0')
         self.end_headers()
 
     def do_GET(self):
@@ -233,7 +234,8 @@ class StealthAPIHandler(BaseHTTPRequestHandler):
             self._send_json({"error": f"Map {map_name} not found"}, 404)
             return
 
-        runner = StealthExperimentRunner(map_path)
+        online_learning = bool(payload.get("online_learning", False))
+        runner = StealthExperimentRunner(map_path, online_learning=online_learning)
         summary = runner.run_benchmark_suite(models, num_trials=trials, player_mode=player_mode)
 
         self._send_json({

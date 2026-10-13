@@ -22,18 +22,20 @@ class ReinforcementLearningGuard:
         #   0: Direct Pursuit (greedy shortest path to player)
         #   1: Explore Unvisited (seek least frequented patrol nodes)
         #   2: Chokepoint Ambush (seek local corridor bottlenecks)
-        #   3: Flank / Lateral Intercept (avoid guard path overlaps)
+        #   3: Flank / Pincer (surround and cut off player)
         self.actions = [0, 1, 2, 3]
-        self.action_names = ["Pursue", "Explore", "Chokepoint", "Flank"]
+        self.action_names = ["Pursue", "Intercept", "Chokepoint", "Flank"]
         
         # Shared or individual Q-table
         self.q_table = q_table if q_table is not None else {}
+        self.online_learning = False
         
         self.last_state = None
         self.last_action = None
         self.last_dist = None
+        self.prev_player_pos = None
         
-        # Track footprints for action 1
+        # Track footprints for exploration
         self.visit_counts = {c: 0 for c in self.env.walkable_cells}
 
     def _get_state(self, guard_pos, player_pos, view_range):
@@ -68,6 +70,10 @@ class ReinforcementLearningGuard:
         self.visit_counts[guard_pos] = self.visit_counts.get(guard_pos, 0) + 1
         state = self._get_state(guard_pos, player_pos, view_range)
         
+        # If online learning is active, update previous transition
+        if self.online_learning and self.last_state is not None:
+            self.update_q_value(guard_pos, player_pos, view_range, is_captured=False)
+            
         # Initialize Q-values if state unseen
         if state not in self.q_table:
             self.q_table[state] = [0.0, 0.0, 0.0, 0.0]
@@ -80,6 +86,14 @@ class ReinforcementLearningGuard:
             best_actions = [a for a in self.actions if self.q_table[state][a] == max_q]
             action = self.rng.choice(best_actions)
 
+        # Calculate player velocity vector if seen
+        v = (0, 0)
+        can_see = self.env.has_line_of_sight(guard_pos, player_pos, view_range)
+        if can_see and self.prev_player_pos is not None:
+            v = (player_pos[0] - self.prev_player_pos[0], player_pos[1] - self.prev_player_pos[1])
+        if can_see:
+            self.prev_player_pos = player_pos
+
         # Store transition info for Bellman update
         self.last_state = state
         self.last_action = action
@@ -90,18 +104,39 @@ class ReinforcementLearningGuard:
         if not nbrs:
             return guard_pos
 
-        if action == 0:  # Direct pursuit
+        if not can_see:
+            # Unobserved search mode
+            if action == 0:  # Direct approach to last known sighting or chokepoint
+                return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
+            elif action == 1:  # Explore least visited area
+                return min(nbrs, key=lambda n: self.visit_counts.get(n, 0))
+            elif action == 2:  # Patrol high connectivity chokepoint
+                return max(nbrs, key=lambda n: self.env.connectivity_field.get(n, 0))
+            else:  # Disperse away from teammate guards
+                other_guards = [g for g in (all_guards or []) if g != guard_pos]
+                if other_guards:
+                    return max(nbrs, key=lambda n: min(self.env.get_distance(n, og) for og in other_guards))
+                return min(nbrs, key=lambda n: self.visit_counts.get(n, 0))
+
+        # Observed pursuit mode
+        if action == 0:  # Direct pursuit: shortest path
             return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
-        elif action == 1:  # Explore least visited area
-            return min(nbrs, key=lambda n: self.visit_counts.get(n, 0))
-        elif action == 2:  # Head toward topological chokepoints
-            return max(nbrs, key=lambda n: self.env.connectivity_field.get(n, 0))
-        else:  # Flank / Lateral evasion cut-off
-            scored_nbrs = []
-            for n in nbrs:
-                score = -self.env.get_distance(n, player_pos) * 2.0 - self.visit_counts.get(n, 0) * 0.5
-                scored_nbrs.append((score, n))
-            return max(scored_nbrs, key=lambda x: x[0])[1]
+        elif action == 1:  # Predictive Interception: lookahead 2 steps
+            pred_cell = (player_pos[0] + 2 * v[0], player_pos[1] + 2 * v[1])
+            if pred_cell in self.env.walkable_cells:
+                return min(nbrs, key=lambda n: self.env.get_distance(n, pred_cell))
+            return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
+        elif action == 2:  # Chokepoint Ambush Cutoff
+            return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos) - self.env.connectivity_field.get(n, 0) * 1.5)
+        else:  # Flanking / Multi-guard pincer
+            other_guards = [g for g in (all_guards or []) if g != guard_pos]
+            if other_guards:
+                def pincer_score(n):
+                    d_p = self.env.get_distance(n, player_pos)
+                    d_og = min(self.env.get_distance(n, og) for og in other_guards)
+                    return -d_p + min(d_og, 5) * 0.4
+                return max(nbrs, key=pincer_score)
+            return min(nbrs, key=lambda n: self.env.get_distance(n, player_pos))
 
     def update_q_value(self, current_pos, player_pos, view_range, is_captured):
         if self.last_state is None or self.last_action is None:
@@ -118,9 +153,9 @@ class ReinforcementLearningGuard:
             if can_see:
                 reward += 15.0
             if self.last_dist is not None and new_dist < self.last_dist:
-                reward += 5.0
+                reward += 6.0
             elif self.last_dist is not None and new_dist > self.last_dist:
-                reward -= 5.0
+                reward -= 6.0
 
         next_state = self._get_state(current_pos, player_pos, view_range)
         if next_state not in self.q_table:
@@ -157,15 +192,18 @@ def train_rl_policy(env, num_episodes=300, save_path=None, seed=42):
     
     # Check if pre-existing weights exist
     if save_path and os.path.exists(save_path):
-        with open(save_path, "r") as f:
-            shared_q_table = json.load(f)
+        try:
+            with open(save_path, "r") as f:
+                shared_q_table = json.load(f)
+        except Exception:
+            shared_q_table = {}
 
     for ep in range(1, num_episodes + 1):
         ep_seed = seed + ep * 13
         guard_positions, player_pos = env.initialize_positions(num_guards=3, random_seed=ep_seed)
         
-        # Epsilon decay: from 0.8 down to 0.05
-        current_epsilon = max(0.05, 0.8 * (1.0 - ep / num_episodes))
+        # Epsilon decay: from 0.7 down to 0.05
+        current_epsilon = max(0.05, 0.7 * (1.0 - ep / num_episodes))
         
         guards = [
             ReinforcementLearningGuard(env, epsilon=current_epsilon, q_table=shared_q_table, random_seed=ep_seed + i)
@@ -181,7 +219,7 @@ def train_rl_policy(env, num_episodes=300, save_path=None, seed=42):
         for t in range(1, max_duration + 1):
             new_guards = []
             for i, g in enumerate(guards):
-                next_pos = g.select_action(guard_positions[i], player_pos, guard_view_range)
+                next_pos = g.select_action(guard_positions[i], player_pos, guard_view_range, all_guards=guard_positions)
                 new_guards.append(next_pos)
             guard_positions = new_guards
             
@@ -198,12 +236,12 @@ def train_rl_policy(env, num_episodes=300, save_path=None, seed=42):
             if guards_in_range > 0:
                 player_hp -= guards_in_range
                 if player_hp <= 0:
-                    for g in guards:
-                        g.update_q_value(guard_positions[0], player_pos, guard_view_range, is_captured=True)
+                    for idx, g in enumerate(guards):
+                        g.update_q_value(guard_positions[idx], player_pos, guard_view_range, is_captured=True)
                     break
                     
-            for g in guards:
-                g.update_q_value(guard_positions[0], player_pos, guard_view_range, is_captured=False)
+            for idx, g in enumerate(guards):
+                g.update_q_value(guard_positions[idx], player_pos, guard_view_range, is_captured=False)
 
     if save_path:
         os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)

@@ -23,10 +23,12 @@ from .guard_rl import ReinforcementLearningGuard
 from .guard_mcts import PotentialFieldGuidedMCTSGuard
 
 class StealthExperimentRunner:
-    def __init__(self, map_file_path, q_table_path=None):
+    def __init__(self, map_file_path, q_table_path=None, online_learning=False):
         self.env = GridEnvironment(map_file_path)
         self.map_name = self.env.map_name
         self.q_table = None
+        self.online_learning = online_learning
+        self.q_table_path = q_table_path
         
         clean_map = self.map_name.lower().replace(" ", "_").replace("(", "").replace(")", "")
         target_q_path = q_table_path if q_table_path else f"data/q_table_{clean_map}.json"
@@ -49,8 +51,10 @@ class StealthExperimentRunner:
         elif gt in ["PI-PF", "PIPF", "PREDICTIVEPF"]:
             return PredictiveInterceptionGuard(self.env, prediction_horizon=2)
         elif gt in ["RL-Q", "RL", "Q-LEARNING", "MARL-Q"]:
-            eps = 0.0 if self.q_table is not None else 0.05
-            return ReinforcementLearningGuard(self.env, epsilon=eps, q_table=self.q_table, random_seed=seed)
+            eps = 0.05 if self.online_learning else (0.0 if self.q_table is not None else 0.05)
+            guard = ReinforcementLearningGuard(self.env, epsilon=eps, q_table=self.q_table, random_seed=seed)
+            guard.online_learning = self.online_learning
+            return guard
         elif gt in ["APF-MCTS", "MCTS", "MCTS-PF"]:
             return PotentialFieldGuidedMCTSGuard(self.env, num_simulations=35, horizon=3, random_seed=seed)
         else:
@@ -211,5 +215,16 @@ class StealthExperimentRunner:
                 writer.writeheader()
                 for r in all_results:
                     writer.writerow(r)
+
+        # Persist updated Q-table if online learning was active
+        if self.online_learning and self.q_table:
+            clean_map = self.map_name.lower().replace(" ", "_").replace("(", "").replace(")", "")
+            save_path = self.q_table_path if self.q_table_path else f"data/q_table_{clean_map}.json"
+            try:
+                os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+                with open(save_path, "w") as f:
+                    json.dump(self.q_table, f, indent=2)
+            except Exception:
+                pass
 
         return summary
