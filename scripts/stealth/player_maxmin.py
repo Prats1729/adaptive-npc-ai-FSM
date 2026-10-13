@@ -7,10 +7,11 @@ class MaxMinPlayer:
     by calculating the minimum distance to any guard along that path.
     Chooses the move that maximizes this minimum distance.
     """
-    def __init__(self, env, lookahead_depth=3):
+    def __init__(self, env, lookahead_depth=3, speed_bonus=0.20):
         self.env = env
         self.lookahead_depth = lookahead_depth
-        self.step_counter = 0
+        self.speed_bonus = speed_bonus
+        self.accumulated_bonus = 0.0
 
     def select_action(self, player_pos, guard_positions):
         neighbors = self.env.get_neighbors(player_pos[0], player_pos[1])
@@ -53,6 +54,9 @@ class MaxMinPlayer:
         return min_overall_dist
 
     def should_take_speed_bonus_step(self):
-        # In Capture Experiment, player moves at 120% speed (6 moves for every 5 guard moves)
-        self.step_counter += 1
-        return (self.step_counter % 5 == 0)
+        # In Capture Experiment, player moves at 120% speed (triggers extra move every 5 ticks)
+        self.accumulated_bonus += self.speed_bonus
+        if self.accumulated_bonus >= 1.0:
+            self.accumulated_bonus -= 1.0
+            return True
+        return False

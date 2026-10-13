@@ -22,7 +22,7 @@ class BaselineFSMGuard:
         self.patrol_target = None
         self.spawn_pos = None
 
-    def select_action(self, guard_pos, player_pos, view_range):
+    def select_action(self, guard_pos, player_pos, view_range, all_guards=None):
         if self.spawn_pos is None:
             self.spawn_pos = guard_pos
             

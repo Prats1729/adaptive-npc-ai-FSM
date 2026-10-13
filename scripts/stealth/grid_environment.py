@@ -13,6 +13,9 @@ class GridEnvironment:
         self.walkable_cells = [
             (r, c) for r in range(self.rows) for c in range(self.cols) if self.grid[r][c] == 0
         ]
+        self.wall_cells = [
+            (r, c) for r in range(self.rows) for c in range(self.cols) if self.grid[r][c] != 0
+        ]
         self._precompute_connectivity()
         self._precompute_distance_matrix()
 
@@ -52,10 +55,11 @@ class GridEnvironment:
     def get_distance(self, cell_a, cell_b):
         return self.dist_matrix.get(cell_a, {}).get(cell_b, 9999)
 
-    def has_line_of_sight(self, pos_a, pos_b, max_range=8.0):
+    def has_line_of_sight(self, pos_a, pos_b, max_range=8.0, view_range=None):
+        effective_range = view_range if view_range is not None else max_range
         # Euclidean distance check first
         eucl = math.hypot(pos_a[0] - pos_b[0], pos_a[1] - pos_b[1])
-        if eucl > max_range:
+        if eucl > effective_range:
             return False
         if pos_a == pos_b:
             return True

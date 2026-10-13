@@ -64,7 +64,7 @@ class ReinforcementLearningGuard:
             
         return f"{dist_tier}|{'SEEN' if can_see else 'HIDDEN'}|{topo}|{quadrant}"
 
-    def select_action(self, guard_pos, player_pos, view_range):
+    def select_action(self, guard_pos, player_pos, view_range, all_guards=None):
         self.visit_counts[guard_pos] = self.visit_counts.get(guard_pos, 0) + 1
         state = self._get_state(guard_pos, player_pos, view_range)
         
