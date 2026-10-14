@@ -88,6 +88,7 @@ def run_single_simulation(args):
     guards = [create_guard(env, guard_type, seed, i) for i in range(3)]
     player = MaxMinPlayer(env, lookahead_depth=3, speed_bonus=0.20)
     
+    player_hp = 3
     captured = False
     cap_time = float(max_duration)
     bt_count = 0
@@ -110,11 +111,14 @@ def run_single_simulation(args):
         if player.should_take_speed_bonus_step():
             p_pos = player.select_action(p_pos, g_positions)
             
-        # 3. Capture condition: guard enters attack range (<= 1.5)
-        if any(math.hypot(g[0]-p_pos[0], g[1]-p_pos[1]) <= 1.5 for g in g_positions):
-            captured = True
-            cap_time = float(t)
-            break
+        # 3. Capture condition: cumulative attack drain (Table 2: 1 HP/sec per guard within range <= 1.5)
+        drains = sum(1 for g in g_positions if math.hypot(g[0]-p_pos[0], g[1]-p_pos[1]) <= 1.5)
+        if drains > 0:
+            player_hp -= drains
+            if player_hp <= 0:
+                captured = True
+                cap_time = float(t)
+                break
             
     return {
         "guard_type": guard_type,
@@ -196,8 +200,8 @@ def main():
         total_suite_error = 0.0
         
         for m_name in maps:
-            print(f"     Simulating {m_name.upper()} (500 runs x {len(models)} models) ...")
-            summary, raw_results = run_suite_on_map(m_name, seed_start, num_trials, models, workers=10)
+            print(f"     Simulating {m_name.upper()} ({num_trials} runs x {len(models)} models) ...", flush=True)
+            summary, raw_results = run_suite_on_map(m_name, seed_start, num_trials, models, workers=11)
             err = evaluate_suite_alignment(summary, m_name)
             total_suite_error += err
             
@@ -230,10 +234,10 @@ def main():
             writer.writeheader()
             writer.writerows(all_raw_rows)
             
-        print(f"     Finished {suite_name} in {elapsed:.1f}s | Alignment Error vs Table 3: {suite_data['total_error']:.2f}s")
+        print(f"     Finished {suite_name} in {elapsed:.1f}s | Alignment Error vs Table 3: {suite_data['total_error']:.2f}s", flush=True)
         for m_name in maps:
             s_map = suite_data["maps"][m_name]["summary"]
-            print(f"     [{m_name.upper()}] CPF: {s_map['CPF']['capture_time_mean']:.2f}s (Paper: {PAPER_TARGETS[m_name]['CPF']['ct']:.2f}s) | APF-MCTS: {s_map['APF-MCTS']['capture_time_mean']:.2f}s | RL-Q: {s_map['RL-Q']['capture_time_mean']:.2f}s")
+            print(f"     [{m_name.upper()}] CPF CR: {s_map['CPF']['capture_rate']:.3f} | CT: {s_map['CPF']['capture_time_mean']:.2f}s (Paper: {PAPER_TARGETS[m_name]['CPF']['ct']:.2f}s) | APF-MCTS: {s_map['APF-MCTS']['capture_rate']:.3f} | RL-Q: {s_map['RL-Q']['capture_rate']:.3f}", flush=True)
             
     # Rank suites by lowest alignment error
     suites_sorted = sorted(suites, key=lambda s: s["total_error"])

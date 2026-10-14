@@ -439,332 +439,6 @@
     // Default Fallback Datasets (overwritten when data/three_best_suites.json loads)
     let BEST_SUITES_DATA = [
   {
-    "id": "suite_4",
-    "name": "Suite D (Seed 5500-6000)",
-    "trials": 500,
-    "maps": {
-      "miami": {
-        "summary": {
-          "Cheat": {
-            "guard_type": "Cheat",
-            "trials": 500,
-            "capture_rate": 0.978,
-            "capture_time_mean": 23.38,
-            "capture_time_std": 9.133808236754899,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "CPF": {
-            "guard_type": "CPF",
-            "trials": 500,
-            "capture_rate": 0.954,
-            "capture_time_mean": 28.436,
-            "capture_time_std": 13.006469178103714,
-            "backtrack_mean": 0.274,
-            "backtrack_std": 0.6447910599737283
-          },
-          "Staleness": {
-            "guard_type": "Staleness",
-            "trials": 500,
-            "capture_rate": 0.21,
-            "capture_time_mean": 53.194,
-            "capture_time_std": 13.964181348057712,
-            "backtrack_mean": 2.912,
-            "backtrack_std": 6.333125053707039
-          },
-          "FSM": {
-            "guard_type": "FSM",
-            "trials": 500,
-            "capture_rate": 0.122,
-            "capture_time_mean": 57.846,
-            "capture_time_std": 6.973919637493713,
-            "backtrack_mean": 3.796,
-            "backtrack_std": 2.972550438970624
-          },
-          "RandomWalk": {
-            "guard_type": "RandomWalk",
-            "trials": 500,
-            "capture_rate": 0.0,
-            "capture_time_mean": 60.0,
-            "capture_time_std": 0.0,
-            "backtrack_mean": 49.728,
-            "backtrack_std": 6.215728965547508
-          },
-          "PI-PF": {
-            "guard_type": "PI-PF",
-            "trials": 500,
-            "capture_rate": 0.942,
-            "capture_time_mean": 28.81,
-            "capture_time_std": 13.50120235126708,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "RL-Q": {
-            "guard_type": "RL-Q",
-            "trials": 500,
-            "capture_rate": 0.996,
-            "capture_time_mean": 21.162,
-            "capture_time_std": 6.239360161944566,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "APF-MCTS": {
-            "guard_type": "APF-MCTS",
-            "trials": 500,
-            "capture_rate": 0.998,
-            "capture_time_mean": 20.662,
-            "capture_time_std": 5.839516753278789,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          }
-        },
-        "error_vs_paper": 4.3008
-      },
-      "test_maze": {
-        "summary": {
-          "Cheat": {
-            "guard_type": "Cheat",
-            "trials": 500,
-            "capture_rate": 0.988,
-            "capture_time_mean": 22.21,
-            "capture_time_std": 6.066259061233372,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "CPF": {
-            "guard_type": "CPF",
-            "trials": 500,
-            "capture_rate": 0.718,
-            "capture_time_mean": 44.186,
-            "capture_time_std": 14.17226552885744,
-            "backtrack_mean": 1.864,
-            "backtrack_std": 2.20254543944629
-          },
-          "Staleness": {
-            "guard_type": "Staleness",
-            "trials": 500,
-            "capture_rate": 0.22,
-            "capture_time_mean": 51.85,
-            "capture_time_std": 15.45513579509704,
-            "backtrack_mean": 4.238,
-            "backtrack_std": 1.7764198081166902
-          },
-          "FSM": {
-            "guard_type": "FSM",
-            "trials": 500,
-            "capture_rate": 0.008,
-            "capture_time_mean": 59.774,
-            "capture_time_std": 2.8613455920588113,
-            "backtrack_mean": 10.838,
-            "backtrack_std": 2.4420653895285986
-          },
-          "RandomWalk": {
-            "guard_type": "RandomWalk",
-            "trials": 500,
-            "capture_rate": 0.0,
-            "capture_time_mean": 60.0,
-            "capture_time_std": 0.0,
-            "backtrack_mean": 75.418,
-            "backtrack_std": 8.686436805085124
-          },
-          "PI-PF": {
-            "guard_type": "PI-PF",
-            "trials": 500,
-            "capture_rate": 0.75,
-            "capture_time_mean": 43.598,
-            "capture_time_std": 13.945369937200331,
-            "backtrack_mean": 0.284,
-            "backtrack_std": 0.532833767367736
-          },
-          "RL-Q": {
-            "guard_type": "RL-Q",
-            "trials": 500,
-            "capture_rate": 0.996,
-            "capture_time_mean": 21.822,
-            "capture_time_std": 4.940762924544458,
-            "backtrack_mean": 0.004,
-            "backtrack_std": 0.06318214912406725
-          },
-          "APF-MCTS": {
-            "guard_type": "APF-MCTS",
-            "trials": 500,
-            "capture_rate": 0.996,
-            "capture_time_mean": 21.808,
-            "capture_time_std": 4.912372013355177,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          }
-        },
-        "error_vs_paper": 3.5480000000000005
-      }
-    },
-    "elapsed_sec": 515.3900058269501,
-    "total_error": 3.9244000000000003
-  },
-  {
-    "id": "suite_5",
-    "name": "Suite E (Seed 7000-7500)",
-    "trials": 500,
-    "maps": {
-      "miami": {
-        "summary": {
-          "Cheat": {
-            "guard_type": "Cheat",
-            "trials": 500,
-            "capture_rate": 0.984,
-            "capture_time_mean": 24.17,
-            "capture_time_std": 8.990592946132423,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "CPF": {
-            "guard_type": "CPF",
-            "trials": 500,
-            "capture_rate": 0.93,
-            "capture_time_mean": 28.616,
-            "capture_time_std": 13.457144328085876,
-            "backtrack_mean": 0.26,
-            "backtrack_std": 0.6206209315527174
-          },
-          "Staleness": {
-            "guard_type": "Staleness",
-            "trials": 500,
-            "capture_rate": 0.248,
-            "capture_time_mean": 52.146,
-            "capture_time_std": 14.478395348370878,
-            "backtrack_mean": 3.032,
-            "backtrack_std": 5.854872762933477
-          },
-          "FSM": {
-            "guard_type": "FSM",
-            "trials": 500,
-            "capture_rate": 0.104,
-            "capture_time_mean": 57.77,
-            "capture_time_std": 7.95686643389807,
-            "backtrack_mean": 3.74,
-            "backtrack_std": 2.826371658771545
-          },
-          "RandomWalk": {
-            "guard_type": "RandomWalk",
-            "trials": 500,
-            "capture_rate": 0.002,
-            "capture_time_mean": 59.96,
-            "capture_time_std": 0.8944271909999159,
-            "backtrack_mean": 49.836,
-            "backtrack_std": 6.151486452162785
-          },
-          "PI-PF": {
-            "guard_type": "PI-PF",
-            "trials": 500,
-            "capture_rate": 0.928,
-            "capture_time_mean": 28.516,
-            "capture_time_std": 13.469543466740244,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "RL-Q": {
-            "guard_type": "RL-Q",
-            "trials": 500,
-            "capture_rate": 0.994,
-            "capture_time_mean": 21.528,
-            "capture_time_std": 6.0981629350456625,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "APF-MCTS": {
-            "guard_type": "APF-MCTS",
-            "trials": 500,
-            "capture_rate": 0.994,
-            "capture_time_mean": 20.89,
-            "capture_time_std": 6.226350043945447,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          }
-        },
-        "error_vs_paper": 4.190000000000001
-      },
-      "test_maze": {
-        "summary": {
-          "Cheat": {
-            "guard_type": "Cheat",
-            "trials": 500,
-            "capture_rate": 1.0,
-            "capture_time_mean": 22.368,
-            "capture_time_std": 5.146021674862662,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          },
-          "CPF": {
-            "guard_type": "CPF",
-            "trials": 500,
-            "capture_rate": 0.74,
-            "capture_time_mean": 44.158,
-            "capture_time_std": 13.974964589241043,
-            "backtrack_mean": 1.82,
-            "backtrack_std": 2.269339066688625
-          },
-          "Staleness": {
-            "guard_type": "Staleness",
-            "trials": 500,
-            "capture_rate": 0.196,
-            "capture_time_mean": 52.708,
-            "capture_time_std": 14.887646558139409,
-            "backtrack_mean": 4.3,
-            "backtrack_std": 1.7743439895314472
-          },
-          "FSM": {
-            "guard_type": "FSM",
-            "trials": 500,
-            "capture_rate": 0.012,
-            "capture_time_mean": 59.774,
-            "capture_time_std": 2.6790443365338747,
-            "backtrack_mean": 11.092,
-            "backtrack_std": 2.4493948375344226
-          },
-          "RandomWalk": {
-            "guard_type": "RandomWalk",
-            "trials": 500,
-            "capture_rate": 0.0,
-            "capture_time_mean": 60.0,
-            "capture_time_std": 0.0,
-            "backtrack_mean": 75.084,
-            "backtrack_std": 8.778100825817418
-          },
-          "PI-PF": {
-            "guard_type": "PI-PF",
-            "trials": 500,
-            "capture_rate": 0.784,
-            "capture_time_mean": 43.194,
-            "capture_time_std": 13.65332158783208,
-            "backtrack_mean": 0.272,
-            "backtrack_std": 0.5390706766174335
-          },
-          "RL-Q": {
-            "guard_type": "RL-Q",
-            "trials": 500,
-            "capture_rate": 0.996,
-            "capture_time_mean": 22.404,
-            "capture_time_std": 5.355571705858599,
-            "backtrack_mean": 0.006,
-            "backtrack_std": 0.0773042812773498
-          },
-          "APF-MCTS": {
-            "guard_type": "APF-MCTS",
-            "trials": 500,
-            "capture_rate": 0.996,
-            "capture_time_mean": 22.468,
-            "capture_time_std": 5.522134001258546,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
-          }
-        },
-        "error_vs_paper": 3.7455999999999996
-      }
-    },
-    "elapsed_sec": 276.9477729797363,
-    "total_error": 3.9678000000000004
-  },
-  {
     "id": "suite_1",
     "name": "Suite A (Seed 1000-1500)",
     "trials": 500,
@@ -774,115 +448,115 @@
           "Cheat": {
             "guard_type": "Cheat",
             "trials": 500,
-            "capture_rate": 0.978,
-            "capture_time_mean": 23.854,
-            "capture_time_std": 9.12025449667762,
+            "capture_rate": 0.91,
+            "capture_time_mean": 29.048,
+            "capture_time_std": 12.114256329334692,
             "backtrack_mean": 0,
             "backtrack_std": 0.0
           },
           "CPF": {
             "guard_type": "CPF",
             "trials": 500,
-            "capture_rate": 0.942,
-            "capture_time_mean": 28.382,
-            "capture_time_std": 12.618499477280023,
-            "backtrack_mean": 0.224,
-            "backtrack_std": 0.5351605306701667
+            "capture_rate": 0.776,
+            "capture_time_mean": 40.26,
+            "capture_time_std": 15.807598183172587,
+            "backtrack_mean": 0.18,
+            "backtrack_std": 0.38457221894355076
           },
           "Staleness": {
             "guard_type": "Staleness",
             "trials": 500,
-            "capture_rate": 0.21,
-            "capture_time_mean": 53.508,
-            "capture_time_std": 13.375790052144138,
-            "backtrack_mean": 3.666,
-            "backtrack_std": 7.744572344655527
+            "capture_rate": 0.186,
+            "capture_time_mean": 54.426,
+            "capture_time_std": 12.476210789792816,
+            "backtrack_mean": 5.36,
+            "backtrack_std": 7.749743030195784
           },
           "FSM": {
             "guard_type": "FSM",
             "trials": 500,
-            "capture_rate": 0.096,
-            "capture_time_mean": 57.976,
-            "capture_time_std": 7.320012922007495,
-            "backtrack_mean": 3.678,
-            "backtrack_std": 2.853524347610304
+            "capture_rate": 0.08,
+            "capture_time_mean": 58.472,
+            "capture_time_std": 6.314821449564489,
+            "backtrack_mean": 3.75,
+            "backtrack_std": 2.903163225419276
           },
           "RandomWalk": {
             "guard_type": "RandomWalk",
             "trials": 500,
             "capture_rate": 0.002,
-            "capture_time_mean": 59.986,
-            "capture_time_std": 0.31304951684997057,
-            "backtrack_mean": 49.996,
-            "backtrack_std": 6.6841109115090775
+            "capture_time_mean": 59.99,
+            "capture_time_std": 0.22360679774997896,
+            "backtrack_mean": 50,
+            "backtrack_std": 6.681713147177326
           },
           "PI-PF": {
             "guard_type": "PI-PF",
             "trials": 500,
-            "capture_rate": 0.94,
-            "capture_time_mean": 28.56,
-            "capture_time_std": 12.781436940364767,
+            "capture_rate": 0.892,
+            "capture_time_mean": 34.504,
+            "capture_time_std": 14.095792518814504,
             "backtrack_mean": 0,
             "backtrack_std": 0.0
           },
           "RL-Q": {
             "guard_type": "RL-Q",
             "trials": 500,
-            "capture_rate": 0.998,
-            "capture_time_mean": 20.8,
-            "capture_time_std": 5.730416682118448,
+            "capture_rate": 0.968,
+            "capture_time_mean": 25.372,
+            "capture_time_std": 9.740604434505027,
             "backtrack_mean": 0,
             "backtrack_std": 0.0
           },
           "APF-MCTS": {
             "guard_type": "APF-MCTS",
             "trials": 500,
-            "capture_rate": 1.0,
-            "capture_time_mean": 20.364,
-            "capture_time_std": 4.881307029539657,
+            "capture_rate": 0.948,
+            "capture_time_mean": 25.498,
+            "capture_time_std": 10.517567897044348,
             "backtrack_mean": 0,
             "backtrack_std": 0.0
           }
         },
-        "error_vs_paper": 4.492399999999999
+        "error_vs_paper": 6.863200000000001
       },
       "test_maze": {
         "summary": {
           "Cheat": {
             "guard_type": "Cheat",
             "trials": 500,
-            "capture_rate": 0.99,
-            "capture_time_mean": 22.5,
-            "capture_time_std": 6.508665412425331,
-            "backtrack_mean": 0,
-            "backtrack_std": 0.0
+            "capture_rate": 0.782,
+            "capture_time_mean": 35.29,
+            "capture_time_std": 15.942214664745725,
+            "backtrack_mean": 0.004,
+            "backtrack_std": 0.06318214912406725
           },
           "CPF": {
             "guard_type": "CPF",
             "trials": 500,
-            "capture_rate": 0.724,
-            "capture_time_mean": 44.542,
-            "capture_time_std": 14.11505244095188,
-            "backtrack_mean": 1.882,
-            "backtrack_std": 2.2800159968499747
+            "capture_rate": 0.302,
+            "capture_time_mean": 54.488,
+            "capture_time_std": 10.58763675728481,
+            "backtrack_mean": 0.216,
+            "backtrack_std": 0.4876675499544306
           },
           "Staleness": {
             "guard_type": "Staleness",
             "trials": 500,
-            "capture_rate": 0.234,
-            "capture_time_mean": 51.2,
-            "capture_time_std": 16.041529270074136,
-            "backtrack_mean": 4.154,
-            "backtrack_std": 1.882916554045611
+            "capture_rate": 0.252,
+            "capture_time_mean": 51.638,
+            "capture_time_std": 15.229932951770696,
+            "backtrack_mean": 4.86,
+            "backtrack_std": 2.9883541492002057
           },
           "FSM": {
             "guard_type": "FSM",
             "trials": 500,
             "capture_rate": 0.01,
-            "capture_time_mean": 59.782,
-            "capture_time_std": 2.782437765672339,
-            "backtrack_mean": 10.996,
-            "backtrack_std": 2.442932631015305
+            "capture_time_mean": 59.81,
+            "capture_time_std": 2.5406317362495647,
+            "backtrack_mean": 11.006,
+            "backtrack_std": 2.4285303207985844
           },
           "RandomWalk": {
             "guard_type": "RandomWalk",
@@ -896,36 +570,362 @@
           "PI-PF": {
             "guard_type": "PI-PF",
             "trials": 500,
-            "capture_rate": 0.784,
-            "capture_time_mean": 43.564,
-            "capture_time_std": 13.710063299319325,
-            "backtrack_mean": 0.236,
-            "backtrack_std": 0.4824619560941114
+            "capture_rate": 0.39,
+            "capture_time_mean": 52.892,
+            "capture_time_std": 11.256720815897236,
+            "backtrack_mean": 0.296,
+            "backtrack_std": 0.5486218843100299
           },
           "RL-Q": {
             "guard_type": "RL-Q",
             "trials": 500,
-            "capture_rate": 0.99,
-            "capture_time_mean": 22.21,
-            "capture_time_std": 6.180152795615519,
+            "capture_rate": 0.704,
+            "capture_time_mean": 38.408,
+            "capture_time_std": 16.828664352460525,
             "backtrack_mean": 0.006,
             "backtrack_std": 0.0773042812773498
           },
           "APF-MCTS": {
             "guard_type": "APF-MCTS",
             "trials": 500,
-            "capture_rate": 0.994,
-            "capture_time_mean": 22.214,
-            "capture_time_std": 6.076681340355478,
+            "capture_rate": 0.706,
+            "capture_time_mean": 38.948,
+            "capture_time_std": 16.786329489064332,
+            "backtrack_mean": 0.004,
+            "backtrack_std": 0.06318214912406725
+          }
+        },
+        "error_vs_paper": 8.1892
+      }
+    },
+    "elapsed_sec": 179.69214749336243,
+    "total_error": 7.5262
+  },
+  {
+    "id": "suite_3",
+    "name": "Suite C (Seed 4000-4500)",
+    "trials": 500,
+    "maps": {
+      "miami": {
+        "summary": {
+          "Cheat": {
+            "guard_type": "Cheat",
+            "trials": 500,
+            "capture_rate": 0.894,
+            "capture_time_mean": 30.158,
+            "capture_time_std": 12.784518913423977,
+            "backtrack_mean": 0,
+            "backtrack_std": 0.0
+          },
+          "CPF": {
+            "guard_type": "CPF",
+            "trials": 500,
+            "capture_rate": 0.794,
+            "capture_time_mean": 39.708,
+            "capture_time_std": 15.365772024203652,
+            "backtrack_mean": 0.136,
+            "backtrack_std": 0.35462023493033235
+          },
+          "Staleness": {
+            "guard_type": "Staleness",
+            "trials": 500,
+            "capture_rate": 0.236,
+            "capture_time_mean": 52.566,
+            "capture_time_std": 14.241604213752126,
+            "backtrack_mean": 5.044,
+            "backtrack_std": 6.633707572112643
+          },
+          "FSM": {
+            "guard_type": "FSM",
+            "trials": 500,
+            "capture_rate": 0.088,
+            "capture_time_mean": 58.552,
+            "capture_time_std": 5.713544011411891,
+            "backtrack_mean": 3.81,
+            "backtrack_std": 2.465371394379445
+          },
+          "RandomWalk": {
+            "guard_type": "RandomWalk",
+            "trials": 500,
+            "capture_rate": 0.0,
+            "capture_time_mean": 60.0,
+            "capture_time_std": 0.0,
+            "backtrack_mean": 49.974,
+            "backtrack_std": 6.579963208990103
+          },
+          "PI-PF": {
+            "guard_type": "PI-PF",
+            "trials": 500,
+            "capture_rate": 0.892,
+            "capture_time_mean": 35.122,
+            "capture_time_std": 14.720751238780856,
+            "backtrack_mean": 0,
+            "backtrack_std": 0.0
+          },
+          "RL-Q": {
+            "guard_type": "RL-Q",
+            "trials": 500,
+            "capture_rate": 0.936,
+            "capture_time_mean": 26.502,
+            "capture_time_std": 11.1386774920789,
+            "backtrack_mean": 0,
+            "backtrack_std": 0.0
+          },
+          "APF-MCTS": {
+            "guard_type": "APF-MCTS",
+            "trials": 500,
+            "capture_rate": 0.94,
+            "capture_time_mean": 25.636,
+            "capture_time_std": 10.783880942237479,
             "backtrack_mean": 0,
             "backtrack_std": 0.0
           }
         },
-        "error_vs_paper": 3.5488
+        "error_vs_paper": 6.6208
+      },
+      "test_maze": {
+        "summary": {
+          "Cheat": {
+            "guard_type": "Cheat",
+            "trials": 500,
+            "capture_rate": 0.784,
+            "capture_time_mean": 35.612,
+            "capture_time_std": 16.17902895590189,
+            "backtrack_mean": 0.006,
+            "backtrack_std": 0.0773042812773498
+          },
+          "CPF": {
+            "guard_type": "CPF",
+            "trials": 500,
+            "capture_rate": 0.29,
+            "capture_time_mean": 54.824,
+            "capture_time_std": 10.287696408564436,
+            "backtrack_mean": 0.178,
+            "backtrack_std": 0.43207566323216473
+          },
+          "Staleness": {
+            "guard_type": "Staleness",
+            "trials": 500,
+            "capture_rate": 0.236,
+            "capture_time_mean": 52.724,
+            "capture_time_std": 14.211113097535389,
+            "backtrack_mean": 5.054,
+            "backtrack_std": 2.9544104457851366
+          },
+          "FSM": {
+            "guard_type": "FSM",
+            "trials": 500,
+            "capture_rate": 0.006,
+            "capture_time_mean": 59.904,
+            "capture_time_std": 1.6024730386747101,
+            "backtrack_mean": 10.9,
+            "backtrack_std": 2.401152028115723
+          },
+          "RandomWalk": {
+            "guard_type": "RandomWalk",
+            "trials": 500,
+            "capture_rate": 0.0,
+            "capture_time_mean": 60.0,
+            "capture_time_std": 0.0,
+            "backtrack_mean": 76.026,
+            "backtrack_std": 9.015535689438265
+          },
+          "PI-PF": {
+            "guard_type": "PI-PF",
+            "trials": 500,
+            "capture_rate": 0.378,
+            "capture_time_mean": 53.578,
+            "capture_time_std": 10.547531314656872,
+            "backtrack_mean": 0.352,
+            "backtrack_std": 0.6040079894360713
+          },
+          "RL-Q": {
+            "guard_type": "RL-Q",
+            "trials": 500,
+            "capture_rate": 0.68,
+            "capture_time_mean": 39.392,
+            "capture_time_std": 17.018036406302947,
+            "backtrack_mean": 0.01,
+            "backtrack_std": 0.09959839195167118
+          },
+          "APF-MCTS": {
+            "guard_type": "APF-MCTS",
+            "trials": 500,
+            "capture_rate": 0.662,
+            "capture_time_mean": 40.192,
+            "capture_time_std": 17.118212593749664,
+            "backtrack_mean": 0.002,
+            "backtrack_std": 0.044721359549995794
+          }
+        },
+        "error_vs_paper": 8.556799999999999
       }
     },
-    "elapsed_sec": 279.0296175479889,
-    "total_error": 4.0206
+    "elapsed_sec": 193.3687388896942,
+    "total_error": 7.588799999999999
+  },
+  {
+    "id": "suite_5",
+    "name": "Suite E (Seed 7000-7500)",
+    "trials": 500,
+    "maps": {
+      "miami": {
+        "summary": {
+          "Cheat": {
+            "guard_type": "Cheat",
+            "trials": 500,
+            "capture_rate": 0.9,
+            "capture_time_mean": 30.404,
+            "capture_time_std": 12.492273523886322,
+            "backtrack_mean": 0,
+            "backtrack_std": 0.0
+          },
+          "CPF": {
+            "guard_type": "CPF",
+            "trials": 500,
+            "capture_rate": 0.76,
+            "capture_time_mean": 40.788,
+            "capture_time_std": 16.029002271746528,
+            "backtrack_mean": 0.15,
+            "backtrack_std": 0.3684719027092464
+          },
+          "Staleness": {
+            "guard_type": "Staleness",
+            "trials": 500,
+            "capture_rate": 0.224,
+            "capture_time_mean": 53.18,
+            "capture_time_std": 13.597845520729054,
+            "backtrack_mean": 4.844,
+            "backtrack_std": 6.063761407312265
+          },
+          "FSM": {
+            "guard_type": "FSM",
+            "trials": 500,
+            "capture_rate": 0.088,
+            "capture_time_mean": 58.076,
+            "capture_time_std": 7.297172153847391,
+            "backtrack_mean": 3.824,
+            "backtrack_std": 2.8895888023893272
+          },
+          "RandomWalk": {
+            "guard_type": "RandomWalk",
+            "trials": 500,
+            "capture_rate": 0.0,
+            "capture_time_mean": 60.0,
+            "capture_time_std": 0.0,
+            "backtrack_mean": 49.87,
+            "backtrack_std": 6.110628409510616
+          },
+          "PI-PF": {
+            "guard_type": "PI-PF",
+            "trials": 500,
+            "capture_rate": 0.888,
+            "capture_time_mean": 34.712,
+            "capture_time_std": 14.629322957005247,
+            "backtrack_mean": 0,
+            "backtrack_std": 0.0
+          },
+          "RL-Q": {
+            "guard_type": "RL-Q",
+            "trials": 500,
+            "capture_rate": 0.962,
+            "capture_time_mean": 26.324,
+            "capture_time_std": 10.110958756416125,
+            "backtrack_mean": 0,
+            "backtrack_std": 0.0
+          },
+          "APF-MCTS": {
+            "guard_type": "APF-MCTS",
+            "trials": 500,
+            "capture_rate": 0.952,
+            "capture_time_mean": 25.602,
+            "capture_time_std": 10.032791726116878,
+            "backtrack_mean": 0,
+            "backtrack_std": 0.0
+          }
+        },
+        "error_vs_paper": 6.9136
+      },
+      "test_maze": {
+        "summary": {
+          "Cheat": {
+            "guard_type": "Cheat",
+            "trials": 500,
+            "capture_rate": 0.792,
+            "capture_time_mean": 35.472,
+            "capture_time_std": 15.842069256149376,
+            "backtrack_mean": 0.006,
+            "backtrack_std": 0.0773042812773498
+          },
+          "CPF": {
+            "guard_type": "CPF",
+            "trials": 500,
+            "capture_rate": 0.29,
+            "capture_time_mean": 54.544,
+            "capture_time_std": 10.492103338460304,
+            "backtrack_mean": 0.212,
+            "backtrack_std": 0.5172921634480165
+          },
+          "Staleness": {
+            "guard_type": "Staleness",
+            "trials": 500,
+            "capture_rate": 0.222,
+            "capture_time_mean": 53.27,
+            "capture_time_std": 13.73573590608685,
+            "backtrack_mean": 5.092,
+            "backtrack_std": 2.9148806250198707
+          },
+          "FSM": {
+            "guard_type": "FSM",
+            "trials": 500,
+            "capture_rate": 0.012,
+            "capture_time_mean": 59.804,
+            "capture_time_std": 2.4127217935157406,
+            "backtrack_mean": 11.106,
+            "backtrack_std": 2.4336411441370878
+          },
+          "RandomWalk": {
+            "guard_type": "RandomWalk",
+            "trials": 500,
+            "capture_rate": 0.0,
+            "capture_time_mean": 60.0,
+            "capture_time_std": 0.0,
+            "backtrack_mean": 75.084,
+            "backtrack_std": 8.778100825817418
+          },
+          "PI-PF": {
+            "guard_type": "PI-PF",
+            "trials": 500,
+            "capture_rate": 0.396,
+            "capture_time_mean": 52.686,
+            "capture_time_std": 11.16731040328362,
+            "backtrack_mean": 0.368,
+            "backtrack_std": 0.587593850432535
+          },
+          "RL-Q": {
+            "guard_type": "RL-Q",
+            "trials": 500,
+            "capture_rate": 0.692,
+            "capture_time_mean": 38.72,
+            "capture_time_std": 16.623304982375622,
+            "backtrack_mean": 0.008,
+            "backtrack_std": 0.08917344788453135
+          },
+          "APF-MCTS": {
+            "guard_type": "APF-MCTS",
+            "trials": 500,
+            "capture_rate": 0.688,
+            "capture_time_mean": 39.484,
+            "capture_time_std": 16.759938396967343,
+            "backtrack_mean": 0.002,
+            "backtrack_std": 0.044721359549995794
+          }
+        },
+        "error_vs_paper": 8.562000000000001
+      }
+    },
+    "elapsed_sec": 250.52939367294312,
+    "total_error": 7.7378
   }
 ];
 
