@@ -126,27 +126,29 @@ vacuum-cleaner effect. Their subsequent work~\cite{alenezi2021}
 extended this to multi-agent skeleton-based corridor sweeps using
 topological graphs of the navigation mesh.
 
-\subsection{Potential Fields in Multi-Agent RL}
-Li~et~al.~\cite{li2024} unified artificial potential fields with
-multi-agent deep reinforcement learning, demonstrating that potential
-fields serve as dense heuristic rewards that dramatically accelerate
-policy convergence. This directly motivates our APF-MCTS hybrid.
+\subsection{Potential Fields and Local Minima}
+Khatib~\cite{khatib1986} established the foundational mathematics
+of Artificial Potential Fields (APF), while identifying the classical
+local minima trapping flaw in concave spaces. Li~et~al.~\cite{li2024}
+unified artificial potential fields with multi-agent reinforcement
+learning, demonstrating that potential fields provide dense heuristic
+guidance that accelerates spatial convergence.
 
-\subsection{Opponent Position Prediction}
+\subsection{Opponent Position Prediction and Interception}
 Isla~\cite{isla2013} introduced probabilistic occupancy maps for
 stealth games, tracking player belief distributions over the map.
 Hladky and Bulitko~\cite{hladky2008} modelled opponent velocity
 vectors for real-time prediction---the kinematic foundation for our
 PI-PF model.
 
-\subsection{Decision-Making Architectures}
+\subsection{Decision-Making and Tree Search Lookahead}
 Britton~\cite{britton2022} provides a comparative analysis of FSM,
 GOAP, and Behaviour Trees across commercial titles, establishing that
 no single architecture dominates: architecture must align with game
-scale and designer intent. Yannakakis~\cite{yannakakis2012} argues
-that NPC behaviour is largely a solved production problem, with
-modern game AI research shifting toward Player Experience Modelling
-and Procedural Content Generation.
+scale and designer intent. Browne~et~al.~\cite{browne2012} survey
+Monte Carlo Tree Search (MCTS), establishing the UCB1 forward search
+principles that directly motivate our APF-MCTS hybrid for pruning
+dead-end local minima.
 
 \subsection{Reinforcement Learning Foundations}
 Sutton and Barto~\cite{sutton2018} provide the mathematical
@@ -638,6 +640,17 @@ R.~S.~Sutton and A.~G.~Barto,
 \emph{Reinforcement Learning: An Introduction}, 2nd~ed.
 Cambridge, MA: MIT Press, 2018.
 
+\bibitem{khatib1986}
+O.~Khatib,
+``Real-Time Obstacle Avoidance for Mobile Robots and Manipulators,''
+\emph{Int.\ J.\ Robot.\ Res.}, vol.~5, no.~1, pp.~90--98, 1986.
+
+\bibitem{browne2012}
+C.~B.~Browne \emph{et~al.},
+``A Survey of Monte Carlo Tree Search Methods,''
+\emph{IEEE Trans.\ Comput.\ Intell.\ AI Games}, vol.~4, no.~1,
+pp.~1--43, 2012.
+
 \bibitem{britton2022}
 G.~Britton,
 ``Decision-Making Decisions: Artificial Intelligence in Computer
@@ -649,12 +662,6 @@ G.~N.~Yannakakis,
 ``Game AI Revisited,''
 in \emph{Proc.\ 9th Conf.\ Comput.\ Frontiers (CF)},
 pp.~285--292, 2012.
-
-\bibitem{yannakakis2011}
-G.~N.~Yannakakis and J.~Togelius,
-``Experience-Driven Procedural Content Generation,''
-\emph{IEEE Trans.\ Affect.\ Comput.}, vol.~2, no.~3,
-pp.~147--161, 2011.
 
 \end{thebibliography}
 
