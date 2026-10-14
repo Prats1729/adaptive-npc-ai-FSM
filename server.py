@@ -38,10 +38,18 @@ class StealthAPIHandler(BaseHTTPRequestHandler):
 
         if path == "/" or path == "/index.html":
             self._serve_file("ui/index.html", "text/html")
+        elif path in ["/empirical", "/empirical.html", "/empirical_results.html"]:
+            self._serve_file("ui/empirical_results.html", "text/html")
         elif path.startswith("/ui/"):
             file_rel = path.lstrip("/")
             mime = "text/html" if file_rel.endswith(".html") else "text/css" if file_rel.endswith(".css") else "application/javascript" if file_rel.endswith(".js") else "application/octet-stream"
             self._serve_file(file_rel, mime)
+        elif path.startswith("/data/"):
+            file_rel = path.lstrip("/")
+            mime = "text/csv" if file_rel.endswith(".csv") else "application/json"
+            self._serve_file(file_rel, mime)
+        elif path == "/api/benchmark-suites":
+            self._handle_get_benchmark_suites()
         elif path == "/api/maps":
             self._handle_get_maps()
         elif path.startswith("/api/map/"):
@@ -137,6 +145,15 @@ class StealthAPIHandler(BaseHTTPRequestHandler):
                 for r in reader:
                     results.append(r)
         self._send_json({"map": map_name, "trials": results})
+
+    def _handle_get_benchmark_suites(self):
+        json_path = "data/three_best_suites.json"
+        if os.path.exists(json_path):
+            with open(json_path, "r") as f:
+                data = json.load(f)
+            self._send_json(data)
+        else:
+            self._send_json({"error": "Suites not generated yet"}, 404)
 
     def _handle_run_visual_match(self, payload):
         map_name = payload.get("map", "miami")
