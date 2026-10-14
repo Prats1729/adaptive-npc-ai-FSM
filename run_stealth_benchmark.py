@@ -2,6 +2,11 @@ import os
 import sys
 import argparse
 
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+
 # Ensure scripts directory is in python path
 sys.path.append(os.path.abspath("scripts"))
 
@@ -42,11 +47,11 @@ def run_evaluation(num_trials=100):
         p_dict = paper_baselines.get(map_name, {})
         for g in guard_models:
             s = summary[g]
-            p_val = p_dict.get(g, "—")
+            p_val = p_dict.get(g, "-")
             is_novel = g in ["PI-PF", "RL-Q", "APF-MCTS"]
             cls_name = "Novel Model" if is_novel else "Paper Model"
-            tag = " ★" if is_novel and s["capture_rate"] >= 0.90 else ""
-            print(f"{g:<12} | {cls_name:<18} | {s['capture_rate']:>6.2f} (Paper: {p_val:>4}){tag:<2} | {s['capture_time_mean']:>5.2f} ± {s['capture_time_std']:<5.2f}s        | {s['backtrack_mean']:>5.2f} ± {s['backtrack_std']:<4.2f}")
+            tag = " *" if is_novel and s["capture_rate"] >= 0.90 else ""
+            print(f"{g:<12} | {cls_name:<18} | {s['capture_rate']:>6.2f} (Paper: {p_val:>4}){tag:<2} | {s['capture_time_mean']:>5.2f} +/- {s['capture_time_std']:<5.2f}s     | {s['backtrack_mean']:>5.2f} +/- {s['backtrack_std']:<4.2f}")
 
         print("-" * 96)
         print(f"Exported raw empirical CSV: {csv_path}")
