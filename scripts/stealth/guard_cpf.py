@@ -37,7 +37,8 @@ class CompositePotentialFieldGuard:
 
     def select_action(self, guard_pos, player_pos, view_range, all_guards=None):
         can_see_player = self.env.has_line_of_sight(guard_pos, player_pos, view_range)
-        guards_list = all_guards if all_guards else [guard_pos]
+        # Individual guard confidence footprint matching base paper (Xu & Verbrugge 2025)
+        guards_list = [guard_pos]
         
         # 1. Update Weight Scheduling
         if can_see_player:

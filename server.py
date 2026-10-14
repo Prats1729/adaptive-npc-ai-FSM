@@ -23,12 +23,14 @@ class StealthAPIHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept')
+        self.send_header('Access-Control-Allow-Private-Network', 'true')
         super().end_headers()
 
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header('Content-Type', 'text/plain')
         self.send_header('Content-Length', '0')
+        self.send_header('Access-Control-Allow-Private-Network', 'true')
         self.end_headers()
 
     def do_GET(self):
@@ -40,6 +42,12 @@ class StealthAPIHandler(BaseHTTPRequestHandler):
             self._serve_file("ui/index.html", "text/html")
         elif path in ["/empirical", "/empirical.html", "/empirical_results.html"]:
             self._serve_file("ui/empirical_results.html", "text/html")
+        elif path in ["/report", "/report.html", "/project_report", "/project_report.html"]:
+            self._serve_file("docs/project_report.html", "text/html")
+        elif path.startswith("/docs/"):
+            file_rel = path.lstrip("/")
+            mime = "text/html" if file_rel.endswith(".html") else "text/plain"
+            self._serve_file(file_rel, mime)
         elif path.startswith("/ui/"):
             file_rel = path.lstrip("/")
             mime = "text/html" if file_rel.endswith(".html") else "text/css" if file_rel.endswith(".css") else "application/javascript" if file_rel.endswith(".js") else "application/octet-stream"

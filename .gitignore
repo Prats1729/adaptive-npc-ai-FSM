@@ -1,7 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
-/research papers/
+
 
 # Python cache ignores
 __pycache__/

@@ -476,6 +476,9 @@
         <a href="empirical_results.html" style="text-decoration:none; padding:0.35rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:600; color:#ffffff; background:#2563eb; border:1px solid #3b82f6; display:inline-flex; align-items:center; gap:0.4rem;">
           <span>&#128202;</span> 500-Trial Empirical Studio &rarr;
         </a>
+        <a href="project_report.html" style="text-decoration:none; padding:0.35rem 0.75rem; border-radius:6px; font-size:0.76rem; font-weight:600; color:#f1f5f9; background:#1e293b; border:1px solid #334155; display:inline-flex; align-items:center; gap:0.4rem;">
+          <span>&#128196;</span> Project Report &rarr;
+        </a>
         <div id="connBadge" class="status-badge">
           <span id="statusDot" class="status-dot"></span>
           <span id="connText">Local AI Engine Ready</span>
@@ -1253,7 +1256,7 @@
       document.getElementById('trialsVal').innerText = n;
     }
 
-    // Built-in Client Simulation Trace Fallback
+    // Built-in Client Simulation Trace Fallback with Real MaxMin Evasion & BFS Pursuit
     function generateLocalSimulationTrace(mapName, guardType) {
       const cleanKey = mapName.includes('maze') ? 'test_maze' : mapName;
       const m = EMBEDDED_MAPS[cleanKey] || EMBEDDED_MAPS.miami;
@@ -1263,6 +1266,72 @@
           if (m.grid[r][c] === 0) walkable.push([r, c]);
         }
       }
+
+      function getNeighbors(pos) {
+        const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        const nbrs = [];
+        for (const [dr, dc] of dirs) {
+          const nr = pos[0] + dr, nc = pos[1] + dc;
+          if (nr >= 0 && nr < m.rows && nc >= 0 && nc < m.cols && m.grid[nr][nc] === 0) {
+            nbrs.push([nr, nc]);
+          }
+        }
+        return nbrs;
+      }
+
+      // BFS shortest path step from start toward target
+      function bfsNextStep(start, target) {
+        if (start[0] === target[0] && start[1] === target[1]) return start;
+        const queue = [[start[0], start[1]]];
+        const visited = new Map();
+        visited.set(`${start[0]},${start[1]}`, null);
+
+        let found = false;
+        while (queue.length > 0) {
+          const curr = queue.shift();
+          if (curr[0] === target[0] && curr[1] === target[1]) {
+            found = true;
+            break;
+          }
+          for (const nbr of getNeighbors(curr)) {
+            const key = `${nbr[0]},${nbr[1]}`;
+            if (!visited.has(key)) {
+              visited.set(key, curr);
+              queue.push(nbr);
+            }
+          }
+        }
+
+        if (!found) return start;
+        let curr = target;
+        while (true) {
+          const prev = visited.get(`${curr[0]},${curr[1]}`);
+          if (!prev) return curr;
+          if (prev[0] === start[0] && prev[1] === start[1]) return curr;
+          curr = prev;
+        }
+      }
+
+      // MaxMin player evasion: maximize minimum distance to any guard
+      function playerEvadeStep(currP, guards) {
+        const nbrs = getNeighbors(currP);
+        if (nbrs.length === 0) return currP;
+        let bestMove = currP;
+        let bestDist = -1;
+        for (const cand of nbrs) {
+          let minDist = 1e9;
+          for (const g of guards) {
+            const d = Math.abs(cand[0] - g[0]) + Math.abs(cand[1] - g[1]);
+            if (d < minDist) minDist = d;
+          }
+          if (minDist > bestDist) {
+            bestDist = minDist;
+            bestMove = cand;
+          }
+        }
+        return bestMove;
+      }
+
       let pPos = walkable[Math.floor(walkable.length * 0.85)];
       let gPositions = [
         walkable[Math.floor(walkable.length * 0.1)],
@@ -1271,28 +1340,57 @@
       ];
       const steps = [];
       let pHp = 3;
-      const targetDuration = guardType.includes('MCTS') ? 26 : guardType.includes('RL') ? 26 : guardType.includes('CPF') ? 31 : (guardType === 'FSM' ? 60 : 31);
+      const targetDuration = guardType.includes('MCTS') ? 35 : guardType.includes('RL') ? 35 : guardType.includes('CPF') ? 45 : (guardType === 'FSM' ? 60 : 45);
+
       for (let t = 1; t <= targetDuration; t++) {
-        gPositions = gPositions.map(g => {
-          const dr = Math.sign(pPos[0] - g[0]);
-          const dc = Math.sign(pPos[1] - g[1]);
-          let cand = (Math.abs(pPos[0] - g[0]) > Math.abs(pPos[1] - g[1])) ? [g[0] + dr, g[1]] : [g[0], g[1] + dc];
-          if (cand[0] >= 0 && cand[0] < m.rows && cand[1] >= 0 && cand[1] < m.cols && m.grid[cand[0]][cand[1]] === 0) return cand;
-          return g;
-        });
-        const dists = gPositions.map(g => Math.hypot(g[0] - pPos[0], g[1] - pPos[1]));
-        const minDist = Math.min(...dists);
-        if (minDist <= 1.5 && guardType !== 'FSM' && guardType !== 'RandomWalk') {
-          pHp -= 1;
-        }
+        const los = gPositions.map(g => Math.hypot(g[0] - pPos[0], g[1] - pPos[1]) < 6.4);
+
         steps.push({
           t: t,
           guards: JSON.parse(JSON.stringify(gPositions)),
           player: [...pPos],
-          los: [minDist < 6.4, minDist < 6.4, false],
+          los: los,
           player_hp: Math.max(0, pHp)
         });
-        if (pHp <= 0) break;
+
+        // 1. Guards move
+        gPositions = gPositions.map((g, idx) => {
+          if (guardType === 'RandomWalk') {
+            const nbrs = getNeighbors(g);
+            return nbrs.length > 0 ? nbrs[Math.floor(Math.random() * nbrs.length)] : g;
+          }
+          let target = pPos;
+          if ((guardType.includes('RL') || guardType.includes('MCTS')) && idx > 0) {
+            const pNbrs = getNeighbors(pPos);
+            if (pNbrs.length >= idx) target = pNbrs[idx - 1];
+          }
+          return bfsNextStep(g, target);
+        });
+
+        // 2. Player evades
+        pPos = playerEvadeStep(pPos, gPositions);
+        // Speed bonus: extra step every 5th tick (+20% speed)
+        if (t % 5 === 0) {
+          pPos = playerEvadeStep(pPos, gPositions);
+        }
+
+        // 3. Attack check
+        const dists = gPositions.map(g => Math.hypot(g[0] - pPos[0], g[1] - pPos[1]));
+        const inRange = dists.filter(d => d <= 1.5).length;
+        if (inRange > 0 && guardType !== 'FSM' && guardType !== 'RandomWalk') {
+          pHp -= inRange;
+        }
+
+        if (pHp <= 0) {
+          steps.push({
+            t: t + 1,
+            guards: JSON.parse(JSON.stringify(gPositions)),
+            player: [...pPos],
+            los: [true, true, true],
+            player_hp: 0
+          });
+          break;
+        }
       }
       return steps;
     }

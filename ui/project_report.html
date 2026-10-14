@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous Guard AI in Stealth Games – Project Report</title>
+
+  <!-- MathJax 3 with LaTeX Support -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- Editorial Typography Fonts: Newsreader (Editorial Serif) + Inter (Humanist Sans) + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, monospace;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --text-heading: #0f172a;
+      --table-header: #f3f6f3;
+      --border-subtle: #e2e8f0;
+      --formula-bg: #f8fafc;
+      --formula-border: #edf2f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f1f5f9;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      line-height: 1.7;
+      padding: 2rem 1rem 4rem 1rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Minimal floating navigation & print bar */
+    .top-nav {
+      max-width: 820px;
+      margin: 0 auto 1.25rem auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 0.6rem 1.15rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      font-size: 13px;
+    }
+    .top-nav a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+      margin-right: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .top-nav a:hover { text-decoration: underline; }
+    .top-nav button {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.15s;
+    }
+    .top-nav button:hover { background: #334155; }
+
+    /* The Main Document Sheet (A4 / Letter Editorial Proportion) */
+    .document-page {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 4rem 4.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Running Header */
+    .running-header {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      margin-bottom: 2.25rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Document Title & Meta */
+    h1.doc-title {
+      font-family: var(--font-serif);
+      font-size: 27px;
+      font-weight: 600;
+      line-height: 1.28;
+      color: var(--text-heading);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.25rem;
+    }
+
+    .doc-authors {
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .doc-authors strong {
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    /* Section Headings */
+    h2 {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-top: 2.25rem;
+      margin-bottom: 0.85rem;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-family: var(--font-serif);
+      font-size: 16.5px;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h4 {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-top: 1.15rem;
+      margin-bottom: 0.35rem;
+    }
+
+    p {
+      margin-bottom: 0.95rem;
+      color: #334155;
+    }
+
+    ul, ol {
+      margin-bottom: 1rem;
+      padding-left: 1.4rem;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+      color: #334155;
+    }
+
+    li strong {
+      color: #0f172a;
+    }
+
+    /* Elegant Summary & Element Table */
+    table.element-table, table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0 1.75rem 0;
+      font-size: 13.5px;
+    }
+
+    table.element-table th, table.element-table td,
+    table.data-table th, table.data-table td {
+      border: 1px solid var(--border-subtle);
+      padding: 7px 11px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table.element-table th, table.data-table th {
+      background: var(--table-header);
+      color: #334155;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    table.element-table td {
+      background: #ffffff;
+      color: #1e293b;
+    }
+
+    table.data-table td.num {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      text-align: right;
+    }
+
+    /* Abstract Block */
+    .abstract-title {
+      font-family: var(--font-serif);
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-top: 1.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .index-terms {
+      font-size: 13px;
+      color: #475569;
+      margin-top: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Claude-Style Formula Boxes */
+    .formula-box {
+      background: var(--formula-bg);
+      border: 1px solid var(--formula-border);
+      border-radius: 6px;
+      padding: 11px 16px;
+      margin: 12px 0 16px 0;
+      display: block;
+      overflow-x: auto;
+      text-align: left;
+    }
+
+    .formula-box .MathJax {
+      font-size: 105% !important;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      background: #f1f5f9;
+      padding: 0.15em 0.35em;
+      border-radius: 4px;
+      color: #0f172a;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .top-nav {
+        display: none;
+      }
+      .document-page {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+      @page {
+        size: A4;
+        margin: 18mm 16mm 18mm 16mm;
+      }
+      h1, h2, h3 {
+        page-break-after: avoid;
+      }
+      table, .formula-box {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Action Bar -->
+  <div class="top-nav">
+    <div>
+      <a id="nav-arena" href="../ui/index.html" onclick="navigateStudio('arena', event)"><span>&#9654;</span> Tactical Arena</a>
+      <a id="nav-empirical" href="../ui/empirical_results.html" onclick="navigateStudio('empirical', event)"><span>&#128202;</span> Empirical Studio</a>
+    </div>
+    <div style="display:flex; align-items:center; gap: 0.75rem;">
+      <span style="font-size: 11.5px; color: #64748b;">(Tip: In print settings, uncheck &ldquo;Headers and footers&rdquo;)</span>
+      <button onclick="window.print()">
+        <span>&#128424;</span> Save as PDF / Print Document
+      </button>
+    </div>
+  </div>
+
+  <div class="document-page">
+
+    <!-- Running Header (matches Claude Page 1) -->
+    <div class="running-header">
+      Autonomous Guard AI in Stealth Games – Project Report
+    </div>
+
+    <!-- Title & Authors -->
+    <h1 class="doc-title">Autonomous Guard AI in Stealth Games:<br>Reproducing Composite Potential Fields and Mitigating Reactive Pursuit Lag</h1>
+
+    <div class="doc-authors">
+      <strong>Vinay Srinivasa, Prateek Verma, Anurag Ranjan, Priyanshu Singh</strong><br>
+      Advanced Artificial Intelligence Mini-Project &middot; Department of Computer Engineering and Technology, Dr. Vishwanath Karad MIT World Peace University, Pune
+    </div>
+
+    <!-- Page 1 Summary Table -->
+    <table class="element-table">
+      <thead>
+        <tr>
+          <th style="width: 25%;">Project element</th>
+          <th>Choice</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Application</strong></td>
+          <td>Guard NPC control for stealth games (pursuit, patrol, search)</td>
+        </tr>
+        <tr>
+          <td><strong>Base paper</strong></td>
+          <td>Xu &amp; Verbrugge, <em>Generic Guard AI in Stealth Game with Composite Potential Fields</em>, AIIDE 2025 (arXiv:2508.18527)</td>
+        </tr>
+        <tr>
+          <td><strong>Environment</strong></td>
+          <td>2D grid maps: <strong>Miami</strong> (26&times;21) and <strong>Test Maze</strong> (20&times;20) for benchmarks; Arkham, TLOU and Dishonored for visualisation</td>
+        </tr>
+        <tr>
+          <td><strong>Guard models</strong></td>
+          <td>5 from the base paper (<code>RandomWalk</code>, <code>FSM</code>, <code>Staleness</code>, <code>CPF</code>, <code>Cheat</code>) plus 3 new (<code>PI-PF</code>, <code>RL-Q</code>, <code>APF-MCTS</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>Adversary</strong></td>
+          <td><code>MaxMin</code> lookahead bot at 120% guard speed (<code>SafetyGraph</code> bot also implemented)</td>
+        </tr>
+        <tr>
+          <td><strong>Evaluation</strong></td>
+          <td>500 Monte-Carlo trials per model per map per suite; 5 suites; 40,000 episodes in total</td>
+        </tr>
+        <tr>
+          <td><strong>Implementation</strong></td>
+          <td>Pure Python standard library, plus a browser-based visualiser and benchmark studio</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Abstract -->
+    <div class="abstract-title">Abstract</div>
+    <p>
+      Guard characters in stealth games are usually built on finite state machines (FSMs) and behaviour trees. These give predictable patrols, back-and-forth oscillation, and pursuit that collapses once a fast player turns a corner. Xu and Verbrugge (AIIDE 2025) proposed Composite Potential Fields (CPF), a continuous steering framework that blends Information, Confidence and Connectivity fields under dynamic weights. This project does three things. First, it independently reproduces the base paper's five guard models and its 60-second capture benchmark on two maps. Second, it identifies two limitations of CPF: reactive pursuit lag, because the Information field is anchored to where the player was, and hand-tuned weights that flatten out in dead-end topologies. Third, it designs and evaluates three new guards: a Predictive Interception Potential Field (PI-PF), a coordinated multi-agent Q-learning guard (RL-Q) and a potential-field-guided Monte Carlo Tree Search guard (APF-MCTS).
+    </p>
+    <p>
+      Over 500 trials per configuration, RL-Q and APF-MCTS reach capture rates of 0.996–0.998 on both maps with zero backtracking. On the dead-end Test Maze they cut mean capture time from 44.19 s (our CPF) to about 21.8 s. PI-PF removes most backtracking but gives only a small, statistically weak change in capture rate. The report also states what these results do and do not establish.
+    </p>
+    <div class="index-terms">
+      <strong>Index Terms</strong> &mdash; stealth games, guard AI, potential fields, Monte Carlo tree search, reinforcement learning, reproducibility.
+    </div>
+
+    <!-- Section 1 -->
+    <h2>1. Introduction</h2>
+    <p>
+      In stealth games such as <em>Metal Gear Solid</em>, <em>Dishonored</em> and <em>Hotline Miami</em>, guard behaviour sets the tension and fairness of the whole game. Most commercial guards run on FSMs with a $\texttt{PATROL} \to \texttt{INVESTIGATE} \to \texttt{CHASE} \to \texttt{RETURN}$ cycle. That design is simple and debuggable, but it has three well-known weaknesses:
+    </p>
+    <ul>
+      <li><strong>Predictability.</strong> Fixed patrol routes can be timed and exploited.</li>
+      <li><strong>Oscillation.</strong> Patrolling guards pace between adjacent doorways every one or two steps (the 'vacuum-cleaner' effect).</li>
+      <li><strong>Reactive pursuit failure.</strong> When the player breaks line of sight, the state machine gives up or stalls at an outdated waypoint.</li>
+    </ul>
+    <p>
+      CPF replaces discrete states with a continuous energy landscape over the map. Guards simply step downhill. The base paper showed this beats FSM, staleness-based and random baselines. Our project asks two follow-up questions. Do the published numbers reproduce in an independent implementation? And can the identified weak points of CPF be fixed with modern search and learning methods?
+    </p>
+
+    <h3>1.1 Objectives</h3>
+    <ul>
+      <li>Reproduce the base paper's environment, guard models, adversary and Table 3 metrics.</li>
+      <li>Formally identify limitations of CPF that the base paper itself points to.</li>
+      <li>Design three guards that address those limitations behind one common interface.</li>
+      <li>Evaluate all eight guards with enough trials ($N = 500$) to make differences meaningful.</li>
+      <li>Keep every reported number traceable to raw simulation logs, with no hard-coded or synthetic results.</li>
+      <li>Ship a reproducible codebase with tests and an interactive way to inspect behaviour.</li>
+    </ul>
+
+    <!-- Section 2 -->
+    <h2>2. Literature Review and Design Basis</h2>
+    <p>
+      The work follows a four-stage lineage in which each stage motivates the next.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Works</th>
+          <th>What it contributes to this project</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Classical game AI</strong></td>
+          <td>Britton (2022); Isla (2013); Spronck et al. (2006)</td>
+          <td>FSMs, behaviour trees and GOAP have rigid transitions; continuous spatial belief maps outperform discrete waypoints; static scripts fail against adaptive human players.</td>
+        </tr>
+        <tr>
+          <td><strong>2. Patrol metrics</strong></td>
+          <td>Al Enezi &amp; Verbrugge (2020, 2021)</td>
+          <td>The staleness metric for patrol coverage; the vacuum-cleaner flaw; skeleton-graph multi-agent search.</td>
+        </tr>
+        <tr>
+          <td><strong>3. Potential fields</strong></td>
+          <td>Khatib (1986); Li et al. (2024); Xu &amp; Verbrugge (2025)</td>
+          <td>Artificial potential fields and the local-minima problem; potential fields as dense guidance for multi-agent systems; CPF itself (our base paper).</td>
+        </tr>
+        <tr>
+          <td><strong>4. Remedies</strong></td>
+          <td>Hladky &amp; Bulitko (2008); Sutton &amp; Barto (2018) and Tan (1993); Browne et al. (2012)</td>
+          <td>Opponent-velocity prediction (&rarr; PI-PF); temporal-difference and cooperative multi-agent Q-learning (&rarr; RL-Q); MCTS with UCB1 (&rarr; APF-MCTS).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:13px; color:#64748b; margin-top: -0.5rem; margin-bottom: 1.25rem;">
+      <em>Note: All 11 foundational research papers are archived locally in the <code>research papers/</code> folder (numbered <code>01</code> to <code>11</code>) to ensure complete auditability.</em>
+    </p>
+
+    <h3>2.1 Design implication</h3>
+    <p>
+      The base paper is strong on coverage and training-free steering, but its own discussion section says the weights were tuned manually and could be improved by search or limited learning. Khatib's local-minima result predicts exactly where a pure gradient-descent guard should fail: in concave, dead-end-rich maps. These two observations define the project's research gaps.
+    </p>
+
+    <!-- Section 3 -->
+    <h2>3. Environment and Benchmark Specification</h2>
+
+    <h3>3.1 Maps</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Map</th>
+          <th>Size</th>
+          <th>Walkable tiles</th>
+          <th>Character</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Miami</strong></td>
+          <td>26&times;21</td>
+          <td>377 (69%)</td>
+          <td>Hotel-style rooms, long hallways, perpendicular blind corners</td>
+        </tr>
+        <tr>
+          <td><strong>Test Maze</strong></td>
+          <td>20&times;20</td>
+          <td>206 (52%)</td>
+          <td>Concentric rings with high dead-end density; stresses local minima</td>
+        </tr>
+        <tr>
+          <td><strong>Arkham</strong></td>
+          <td>28&times;26</td>
+          <td>548 (75%)</td>
+          <td>Asymmetric facility (visualisation only)</td>
+        </tr>
+        <tr>
+          <td><strong>TLOU</strong></td>
+          <td>14&times;30</td>
+          <td>255 (61%)</td>
+          <td>Narrow corridors and rooms (visualisation only)</td>
+        </tr>
+        <tr>
+          <td><strong>Dishonored</strong></td>
+          <td>26&times;39</td>
+          <td>726 (72%)</td>
+          <td>Large open estate (visualisation only)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 Perception, combat and timing</h3>
+    <ul>
+      <li><strong>Line of sight</strong> uses Bresenham raycasting; walls occlude. The base range is 8.0 tiles and experiments use 6.4 tiles (80%), as in the base paper's Table 2.</li>
+      <li><strong>Combat.</strong> The player has 3 HP. A guard within 1.5 tiles deals 1 HP per second (0.5 per 0.5 s tick). The player is captured at 0 HP or when a guard enters its cell.</li>
+      <li><strong>Clock.</strong> Each trial lasts 60 s (120 ticks of 0.5 s). Guards move one tile per tick (2.0 tiles/s).</li>
+      <li><strong>Speed advantage.</strong> The player bot moves at 120% of guard speed, taking an extra step every fifth tick. This is deliberate: it is what exposes pursuit lag.</li>
+      <li>Three guards start at random walkable cells outside the player's initial line of sight.</li>
+    </ul>
+
+    <h3>3.3 Metrics</h3>
+    <p>
+      Capture rate, mean capture time and backtracking frequency are computed over $N$ trials with $G = 3$ guards. A trial without capture counts as the 60 s limit in the time average.
+    </p>
+
+    <div class="formula-box">
+      $$\text{CR} = \frac{\left|\{\, i : \text{trial } i \text{ ends in capture} \,\}\right|}{N}$$
+    </div>
+
+    <div class="formula-box">
+      $$\overline{\text{CT}} = \frac{1}{N} \sum_{i=1}^{N} \min\left( t_i^{\text{cap}},\; T_{\max} \right), \qquad T_{\max} = 60\text{ s}$$
+    </div>
+
+    <div class="formula-box">
+      $$B = \frac{1}{N\,G} \sum_{i=1}^{N} \sum_{g=1}^{G} \sum_{t=2}^{T_i} \mathbb{1}\left[\, n_t^{(g)} = n_{t-2}^{(g)} \,\right]$$
+    </div>
+
+    <p>
+      Here $t_i^{\text{cap}}$ is the capture time in trial $i$, and $B$ counts immediate position reversals per guard per trial.
+    </p>
+
+    <!-- Section 4 -->
+    <h2>4. The Base Method: Composite Potential Fields</h2>
+    <p>
+      Each cell $n$ receives a scalar potential, and a guard steps to the neighbouring cell with the lowest smoothed value:
+    </p>
+
+    <div class="formula-box">
+      $$\phi(n) = w_I(t)\, I(n) + w_C(t)\, C(n) + w_N(t)\, N(n)$$
+    </div>
+
+    <h4>Information field $I(n)$</h4>
+    <p>
+      An attractive well around the player's last known cell $p_t$. While the player is hidden, it decays by a factor of 0.95 per tick.
+    </p>
+    <div class="formula-box">
+      $$I(n) = -I_0\, \gamma_I^{d(p_t,\, n)}, \qquad I_0 = 5.0, \;\; \gamma_I = 0.9$$
+    </div>
+
+    <h4>Confidence field $C(n)$</h4>
+    <p>
+      Repels guards from cells they recently covered, so they explore.
+    </p>
+    <div class="formula-box">
+      $$C(n) \leftarrow \rho\, C(n) + \sum_{g \in \mathcal{G}} C_0\, \gamma_C^{d(g,\, n)}, \qquad C_0 = 1.0, \;\; \gamma_C = 0.8, \;\; \rho = 0.95$$
+    </div>
+
+    <h4>Connectivity field $N(n)$</h4>
+    <p>
+      A static preference for junction cells.
+    </p>
+    <div class="formula-box">
+      $$N(n) = \frac{\deg(n)}{\max_{v \in \mathcal{V}} \deg(v)}$$
+    </div>
+
+    <h4>Dynamic weights</h4>
+    <p>
+      The Information weight rises while the player is in view and decays when it is hidden. In view, $w_C$ and $w_N$ drop to zero; when hidden they return to 0.50 and 0.10.
+    </p>
+    <div class="formula-box">
+      $$w_I(t) = \begin{cases} \min(0.90,\; w_I(t-1) + \delta_w) & \text{player in line of sight} \\[4pt] \max(0.40,\; w_I(t-1) - \delta_w) & \text{otherwise} \end{cases} \qquad \delta_w = 0.05$$
+    </div>
+
+    <h4>Smoothing and move selection</h4>
+    <p>
+      Potentials are averaged over a radius-3 neighbourhood with decay $\lambda = 0.8$, and the guard steps to the neighbouring cell with the lowest smoothed value.
+    </p>
+    <div class="formula-box">
+      $$n^{*} = \arg\min_{x \in \mathcal{N}(u)} K(x), \qquad K(x) = \frac{\sum_{y \in \mathcal{R}_{\delta}(x)} \lambda^{d(x,y)}\, \phi(y)}{\sum_{y \in \mathcal{R}_{\delta}(x)} \lambda^{d(x,y)}}$$
+    </div>
+
+    <!-- Section 5 -->
+    <h2>5. Identified Research Gaps</h2>
+
+    <h3>Gap 1 – Reactive pursuit lag</h3>
+    <p>
+      The Information field is centred on $p_t$, the player's past position. Because the evasive player moves 20% faster, it is already two or three tiles down a side corridor by the time guards reach $p_t$. Guards therefore follow the player's trail without ever closing the distance in open layouts.
+    </p>
+
+    <h3>Gap 2 – Hand-tuned weights and local minima</h3>
+    <p>
+      The weights ($0.9, 0.5, 0.1$) were set by hand. In maps with many dead ends the gradient flattens ($\nabla\phi \approx 0$) and guards oscillate inside concave pockets while the player escapes. This is the classical local-minimum trap described by Khatib (1986), and it is where we expected CPF to be weakest.
+    </p>
+
+    <!-- Section 6 -->
+    <h2>6. Guard and Adversary Models</h2>
+    <p>
+      Every guard implements one interface, <code>select_action(guard_pos, player_pos, view_range, all_guards) &rarr; next_tile</code>, so all eight models run through the same capture runner with no special cases.
+    </p>
+
+    <h3>6.1 Base-paper models</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>RandomWalk</strong></td>
+          <td>Uniformly random walkable neighbour; zero-intelligence floor.</td>
+        </tr>
+        <tr>
+          <td><strong>FSM</strong></td>
+          <td>Four states with the base paper's Table 2 timers: investigate 3 s, lose-sight 2 s, chase maximum 10 s, return maximum 5 s.</td>
+        </tr>
+        <tr>
+          <td><strong>Staleness</strong></td>
+          <td>Patrols toward the cell with the oldest visit timestamp; switches to BFS pursuit on sighting (Al Enezi &amp; Verbrugge 2020).</td>
+        </tr>
+        <tr>
+          <td><strong>CPF</strong></td>
+          <td>Composite potential field with dynamic weights and kernel smoothing (Section 4).</td>
+        </tr>
+        <tr>
+          <td><strong>Cheat</strong></td>
+          <td>Omniscient upper bound that follows the exact BFS shortest path to the player every tick.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>6.2 Novel Model 1 – PI-PF (Predictive Interception Potential Field)</h3>
+    <p>
+      <em>Targets Gap 1.</em> The guard estimates the player's velocity from successive observations and projects an interception point $k$ tiles ahead, with $k$ between 2 and 3.
+    </p>
+    <div class="formula-box">
+      $$\vec{v}_p = p_t - p_{t-1}, \qquad p_{\text{pred}} = p_t + k\, \vec{v}_p$$
+    </div>
+    <p>
+      If the projected cell is a wall, the nearest reachable walkable cell is used instead. The Information well is then centred on the predicted cell rather than the last seen one.
+    </p>
+    <div class="formula-box">
+      $$I_{\text{pred}}(n) = -I_0\, \gamma_I^{d(p_{\text{pred}},\, n)}$$
+    </div>
+    <p>
+      All other CPF components are unchanged, which isolates the effect of prediction.
+    </p>
+
+    <h3>6.3 Novel Model 2 – RL-Q (Coordinated Q-Learning)</h3>
+    <p>
+      <em>Targets Gap 2 (hand-tuned weights).</em> Instead of tuning field weights, the guard learns which tactical macro-action to take.
+    </p>
+    <ul>
+      <li><strong>State (48 states):</strong> distance bucket ($\text{CLOSE} \le 3$, $\text{MID } 4\text{--}8$, $\text{FAR} > 8$) &times; line of sight (seen/hidden) &times; topology (chokepoint with &ge; 3 exits vs hallway) &times; relative quadrant (NE, NW, SE, SW).</li>
+      <li><strong>Actions (4):</strong> DirectPursuit, ExploreUnvisited, ChokepointAmbush, and Flank (maximise angle relative to peer guards to form a pincer).</li>
+    </ul>
+
+    <h4>Reward function</h4>
+    <p>
+      Capture and line-of-sight are rewarded, closing distance is rewarded, widening it is penalised, and every step costs a little.
+    </p>
+    <div class="formula-box">
+      $$R(s,a) = \begin{cases} +100 & \text{player captured} \\ +15 & \text{line of sight maintained} \\ +5 & \text{distance to player decreased} \\ -5 & \text{distance to player increased} \\ -1 & \text{step penalty} \end{cases}$$
+    </div>
+
+    <h4>Update rule</h4>
+    <p>
+      Temporal-difference (TD(0)) Q-learning with learning rate $\alpha = 0.10$ and discount $\gamma = 0.95$:
+    </p>
+    <div class="formula-box">
+      $$Q(s,a) \leftarrow Q(s,a) + \alpha \left[ R + \gamma \max_{a'} Q(s',a') - Q(s,a) \right]$$
+    </div>
+    <p>
+      <strong>Training.</strong> 300 offline self-play episodes (<code>train_rl_agent.py</code>), with Q-tables saved as JSON per map. Evaluation is purely greedy ($\varepsilon = 0$).
+    </p>
+
+    <h3>6.4 Novel Model 3 – APF-MCTS (Potential-Field-Guided Monte Carlo Tree Search)</h3>
+    <p>
+      <em>Targets Gap 2 (local minima).</em> The guard searches forward before moving, so it can see that a corridor is a dead end before entering it.
+    </p>
+    <ol>
+      <li>
+        <strong>Selection</strong> walks the tree with the UCB1 rule, using exploration constant $c = \sqrt{2}$:
+        <div class="formula-box">
+          $$\text{UCB1}(s,a) = \frac{Q(s,a)}{N(s,a)} + c \sqrt{\frac{\ln N(s)}{N(s,a)}}$$
+        </div>
+      </li>
+      <li><strong>Expansion and simulation</strong> look ahead $H = 4$ steps while simulating the adversary's evasion responses.</li>
+      <li>
+        <strong>Leaf evaluation</strong> uses the composite potential as a dense heuristic instead of random rollouts, where $d$ is the BFS distance from guard cell $n_g$ to the player $p$:
+        <div class="formula-box">
+          $$V(s_H) = -\phi(n_g) - \beta\, d(n_g,\, p), \qquad \beta = 0.5$$
+        </div>
+      </li>
+      <li><strong>Backpropagation</strong> updates visit counts and values back to the root.</li>
+    </ol>
+
+    <h3>6.5 Adversary policies</h3>
+    <p>
+      <strong>MaxMin</strong> looks three steps ahead and picks the move whose resulting cell $p'$ maximises the minimum BFS distance to any guard. All headline results use this bot.
+    </p>
+    <div class="formula-box">
+      $$a^{*} = \arg\max_{a} \; \min_{g \in \mathcal{G}} \; d(p',\, g)$$
+    </div>
+
+    <p>
+      <strong>SafetyGraph</strong> computes a time margin for every cell: the earliest guard arrival time minus the player's arrival time. It moves along high-margin contours. It is implemented and tested, but not used for the reported tables.
+    </p>
+    <div class="formula-box">
+      $$S(n) = T_g(n) - T_p(n), \qquad T_g(n) = \min_{g} \frac{d(g,n)}{v_g}, \qquad T_p(n) = \frac{d(p,n)}{v_p}$$
+    </div>
+
+    <!-- Section 7 -->
+    <h2>7. Software Architecture and Engineering Decisions</h2>
+    <ul>
+      <li><strong>No heavy dependencies.</strong> The whole system uses the Python standard library (<code>http.server</code>, <code>threading</code>, <code>json</code>, <code>math</code>, <code>random</code>). This makes runs deterministic and portable across Windows, macOS and Linux, with no CUDA or wheel-version problems.</li>
+      <li><strong>Single agent API.</strong> Guard logic is decoupled from the environment, so adding a ninth model requires no change to the runner.</li>
+      <li><strong>Real data only.</strong> Every table and chart comes from executed simulations logged to raw CSV files; nothing is mocked or hard-coded.</li>
+      <li><strong>Parallel benchmarking.</strong> <code>run_5_suites.py</code> uses <code>ProcessPoolExecutor</code> with 10 workers on a 12-core machine, which turns 40,000 episodes into a job of minutes rather than hours.</li>
+      <li><strong>Two web studios served by one threaded Python server (<code>server.py</code>, port 8080):</strong>
+        <ul>
+          <li><strong>Tactical Arena (<code>/</code>):</strong> live canvas rendering of all five maps, guard line-of-sight cones, player breadcrumb trails, a step scrubber and 1&times;/2&times;/5&times; playback.</li>
+          <li><strong>Empirical Studio (<code>/empirical</code>):</strong> switch between stored 500-trial suites, view Chart.js bar and radar charts, compare against base-paper deltas, and export CSV.</li>
+        </ul>
+      </li>
+      <li><strong>Automated tests.</strong> Seven unit tests run in under two seconds. They cover map loading, geodesic distance symmetry, Bresenham occlusion, one-step action validity for all eight guards (no diagonal jumps or wall entry), both adversaries and the +20% speed trigger, a full 60-second trial for every guard type, and Q-table save/reload.</li>
+    </ul>
+
+    <!-- Section 8 -->
+    <h2>8. Experimental Protocol</h2>
+    <ul>
+      <li>Five independent suites, each with 500 trials per model per map. That is 8 models &times; 2 maps &times; 500 = 8,000 episodes per suite and 40,000 overall.</li>
+      <li>Suite D (seeds 5500–6000) is the reference suite for the tables below.</li>
+      <li>Same adversary, speed advantage, view range and time limit for every guard. Only the guard policy changes.</li>
+      <li>Base-paper values come from its Table 3, which used roughly 50 trials per cell.</li>
+    </ul>
+
+    <!-- Section 9 -->
+    <h2>9. Results</h2>
+
+    <h3>9.1 Main comparison (Suite D, N = 500)</h3>
+    <p>
+      CT is in seconds and includes timeouts. Paper columns are the published base-paper values ($N \approx 50$).
+    </p>
+
+    <h4>Miami</h4>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>CR</th>
+          <th>CT &plusmn; &sigma;</th>
+          <th>B</th>
+          <th>Paper CR</th>
+          <th>Paper CT</th>
+          <th>Paper B</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Cheat</strong></td>
+          <td class="num">0.978</td>
+          <td class="num">23.38 &plusmn; 9.13</td>
+          <td class="num">0.00</td>
+          <td class="num">0.95</td>
+          <td class="num">20.25</td>
+          <td class="num">0.00</td>
+        </tr>
+        <tr>
+          <td><strong>CPF</strong></td>
+          <td class="num">0.954</td>
+          <td class="num">28.44 &plusmn; 13.01</td>
+          <td class="num">0.27</td>
+          <td class="num">0.80</td>
+          <td class="num">31.70</td>
+          <td class="num">0.36</td>
+        </tr>
+        <tr>
+          <td><strong>Staleness</strong></td>
+          <td class="num">0.210</td>
+          <td class="num">53.19 &plusmn; 13.96</td>
+          <td class="num">2.91</td>
+          <td class="num">0.56</td>
+          <td class="num">42.65</td>
+          <td class="num">3.66</td>
+        </tr>
+        <tr>
+          <td><strong>FSM</strong></td>
+          <td class="num">0.122</td>
+          <td class="num">57.85 &plusmn; 6.97</td>
+          <td class="num">3.80</td>
+          <td class="num">0.12</td>
+          <td class="num">55.10</td>
+          <td class="num">3.42</td>
+        </tr>
+        <tr>
+          <td><strong>RandomWalk</strong></td>
+          <td class="num">0.000</td>
+          <td class="num">60.00 &plusmn; 0.00</td>
+          <td class="num">49.73</td>
+          <td class="num">0.04</td>
+          <td class="num">58.18</td>
+          <td class="num">51.34</td>
+        </tr>
+        <tr style="background:#f0f7ff;">
+          <td><strong>PI-PF</strong></td>
+          <td class="num">0.942</td>
+          <td class="num">28.81 &plusmn; 13.50</td>
+          <td class="num">0.00</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+        </tr>
+        <tr style="background:#f0f7ff;">
+          <td><strong>RL-Q</strong></td>
+          <td class="num">0.996</td>
+          <td class="num">21.16 &plusmn; 6.24</td>
+          <td class="num">0.00</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+        </tr>
+        <tr style="background:#f0f7ff;">
+          <td><strong>APF-MCTS</strong></td>
+          <td class="num">0.998</td>
+          <td class="num">20.66 &plusmn; 5.84</td>
+          <td class="num">0.00</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Test Maze</h4>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>CR</th>
+          <th>CT &plusmn; &sigma;</th>
+          <th>B</th>
+          <th>Paper CR</th>
+          <th>Paper CT</th>
+          <th>Paper B</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Cheat</strong></td>
+          <td class="num">0.988</td>
+          <td class="num">22.21 &plusmn; 6.07</td>
+          <td class="num">0.00</td>
+          <td class="num">0.95</td>
+          <td class="num">20.25</td>
+          <td class="num">0.00</td>
+        </tr>
+        <tr>
+          <td><strong>CPF</strong></td>
+          <td class="num">0.718</td>
+          <td class="num">44.19 &plusmn; 14.17</td>
+          <td class="num">1.86</td>
+          <td class="num">0.52</td>
+          <td class="num">41.20</td>
+          <td class="num">2.18</td>
+        </tr>
+        <tr>
+          <td><strong>Staleness</strong></td>
+          <td class="num">0.220</td>
+          <td class="num">51.85 &plusmn; 15.46</td>
+          <td class="num">4.24</td>
+          <td class="num">0.38</td>
+          <td class="num">42.65</td>
+          <td class="num">4.82</td>
+        </tr>
+        <tr>
+          <td><strong>FSM</strong></td>
+          <td class="num">0.008</td>
+          <td class="num">59.77 &plusmn; 2.86</td>
+          <td class="num">10.84</td>
+          <td class="num">0.08</td>
+          <td class="num">58.00</td>
+          <td class="num">11.24</td>
+        </tr>
+        <tr>
+          <td><strong>RandomWalk</strong></td>
+          <td class="num">0.000</td>
+          <td class="num">60.00 &plusmn; 0.00</td>
+          <td class="num">75.42</td>
+          <td class="num">0.02</td>
+          <td class="num">58.18</td>
+          <td class="num">76.12</td>
+        </tr>
+        <tr style="background:#f0f7ff;">
+          <td><strong>PI-PF</strong></td>
+          <td class="num">0.750</td>
+          <td class="num">43.60 &plusmn; 13.95</td>
+          <td class="num">0.28</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+        </tr>
+        <tr style="background:#f0f7ff;">
+          <td><strong>RL-Q</strong></td>
+          <td class="num">0.996</td>
+          <td class="num">21.82 &plusmn; 4.94</td>
+          <td class="num">0.00</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+        </tr>
+        <tr style="background:#f0f7ff;">
+          <td><strong>APF-MCTS</strong></td>
+          <td class="num">0.996</td>
+          <td class="num">21.81 &plusmn; 4.91</td>
+          <td class="num">0.00</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+          <td class="num">&ndash;</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>9.2 Reproduction fidelity</h3>
+    <p>
+      The ordering of the base-paper models matches the published ranking on both maps: <strong>Cheat &gt; CPF &gt; Staleness &gt; FSM &gt; RandomWalk</strong>. Several individual figures land very close to the paper:
+    </p>
+    <ul>
+      <li>FSM on Miami: CR 0.122 against 0.120, and B = 3.80 against 3.42.</li>
+      <li>FSM on Test Maze: B = 10.84 against 11.24.</li>
+      <li>RandomWalk on Test Maze: B = 75.42 against 76.12.</li>
+      <li>Cheat: 22.2–23.4 s against 20.25 s, inside the paper's own standard deviation of &plusmn;14.66 s.</li>
+    </ul>
+    <p>
+      There are two known deviations. Our CPF captures more often than the published one (0.954 against 0.80 on Miami). We attribute this to an immediate-reversal suppression we added to remove an oscillation bug, which lowers B from 0.36 to 0.27. Our Staleness guard underperforms the paper (0.210 against 0.56 on Miami), most likely because the original used navigation-mesh visibility edges while our grid reproduction is limited to 4-connected movement.
+    </p>
+
+    <h3>9.3 Gains of the novel models</h3>
+    <p>
+      The cleanest comparison is against our own CPF, because it runs in the same simulator with the same seeds.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Miami &Delta;CR</th>
+          <th>Miami &Delta;CT</th>
+          <th>Maze &Delta;CR</th>
+          <th>Maze &Delta;CT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PI-PF</strong></td>
+          <td class="num">&minus;1.2 pp</td>
+          <td class="num">+0.37 s</td>
+          <td class="num">+3.2 pp</td>
+          <td class="num">&minus;0.59 s</td>
+        </tr>
+        <tr>
+          <td><strong>RL-Q</strong></td>
+          <td class="num">+4.2 pp</td>
+          <td class="num">&minus;7.28 s</td>
+          <td class="num">+27.8 pp</td>
+          <td class="num">&minus;22.37 s</td>
+        </tr>
+        <tr>
+          <td><strong>APF-MCTS</strong></td>
+          <td class="num">+4.4 pp</td>
+          <td class="num">&minus;7.78 s</td>
+          <td class="num">+27.8 pp</td>
+          <td class="num">&minus;22.38 s</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Against the published CPF figures, the capture-rate gains are larger (RL-Q +19.6 pp and APF-MCTS +19.8 pp on Miami; +47.6 pp for both on the maze), but part of that gap comes from our CPF itself being stronger than the paper's, so we treat the table above as the fair measure.
+    </p>
+
+    <!-- Section 10 -->
+    <h2>10. Discussion</h2>
+    <p>
+      <strong>Open corridors (Miami).</strong> RL-Q and APF-MCTS slightly exceed the Cheat guard on capture rate (0.996 and 0.998 against 0.978) and finish 2.2 to 2.7 s sooner on average. So Cheat is a reference chaser, not a strict upper bound here: it follows the shortest path to where the player is now, while the coordinated guards cut off exits ahead of it. The learned Flank and ChokepointAmbush actions send different guards down different corridors, which independent gradient descent in CPF cannot express.
+    </p>
+    <p>
+      <strong>Dead-end mazes (Test Maze).</strong> This is the clearest result. CPF reaches 0.718 here because flattened gradients inside dead ends stall it. RL-Q and APF-MCTS reach 0.996 with essentially no backtracking. Q-learning finds that ambushing at chokepoints is the best action when the player is hidden at a junction, and the tree search sees dead ends several steps before committing to them. Neither needed hand-tuned field weights.
+    </p>
+    <p>
+      <strong>PI-PF.</strong> Prediction almost eliminates backtracking (0.27 &rarr; 0.00 on Miami, 1.86 &rarr; 0.28 on the maze), but its effect on capture rate is small and, with $N = 500$, within roughly one standard error of CPF in both directions. A plausible reason is that MaxMin reverses direction often, which spoils a constant-velocity forecast. So Gap 1 is only partly addressed: prediction helps smoothness more than it helps catching the player.
+    </p>
+    <p>
+      <strong>Interpretation.</strong> The strongest evidence in this study is that lookahead and learned coordination remove the dead-end failure of CPF. The evidence that velocity prediction removes pursuit lag is weak and should be reported as such.
+    </p>
+
+    <!-- Section 11 -->
+    <h2>11. Limitations and Threats to Validity</h2>
+    <ul>
+      <li><strong>Information access.</strong> RL-Q's state includes distance and quadrant relative to the player, and APF-MCTS scores leaves by distance to the player. If these are computed from the player's true position while it is hidden, these guards know more than CPF does and the comparison is not like-for-like. The report should state exactly which position each model sees, and ideally add an ablation that restricts them to last-known position.</li>
+      <li><strong>Suite selection.</strong> Suite D was chosen as the reference suite because it matched the base paper most closely. Reporting the mean and spread across all five suites would remove any suggestion of selection bias.</li>
+      <li><strong>Single adversary.</strong> All headline numbers use MaxMin. The SafetyGraph bot is implemented but not reported, so robustness to a different evasion strategy is unmeasured.</li>
+      <li><strong>Per-map training.</strong> RL-Q Q-tables are trained and evaluated on the same map. Generalisation to unseen maps is untested.</li>
+      <li><strong>Grid abstraction.</strong> Maps are 4-connected grids rather than navigation meshes, which explains the Staleness gap and limits how directly results transfer to a commercial engine.</li>
+      <li><strong>Gameplay value.</strong> Capture rate and capture time measure efficiency, not fun. A guard that is too good may be unfair to players; no human playtesting was done.</li>
+      <li><strong>Reference data.</strong> Base-paper figures were used as published ($N \approx 50$), so their own sampling error is larger than ours.</li>
+    </ul>
+
+    <!-- Section 12 -->
+    <h2>12. Future Work</h2>
+    <ul>
+      <li>Run all five suites and report means with confidence intervals; add statistical tests for each model pair.</li>
+      <li>Add last-known-position-only ablations for RL-Q and APF-MCTS.</li>
+      <li>Evaluate against the SafetyGraph adversary and against human players.</li>
+      <li>Improve PI-PF with smoother velocity estimates (for example Kalman filtering), a longer or adaptive horizon, and multi-guard coordinated interception.</li>
+      <li>Train RL-Q across several maps, and consider function approximation (DQN) for larger or partially observable state spaces.</li>
+      <li>Port to navigation-mesh environments to close the Staleness fidelity gap.</li>
+      <li>Add difficulty tuning (for example limiting search budget or view range) so guards stay beatable.</li>
+    </ul>
+
+    <!-- Section 13 -->
+    <h2>13. Conclusion</h2>
+    <p>
+      This project reproduced the Composite Potential Field guard framework in an independent, dependency-free implementation and confirmed the base paper's qualitative findings and several of its numbers across 40,000 simulated episodes. It then identified two limitations of CPF, reactive pursuit lag and hand-tuned weights with local minima, and tested three guards designed to address them. Coordinated Q-learning (RL-Q) and potential-field-guided MCTS (APF-MCTS) raise the capture rate on the dead-end Test Maze from 0.718 to 0.996 and cut mean capture time by more than 22 seconds, with no backtracking. Predictive interception (PI-PF) reduces oscillation but offers only a marginal capture benefit. The work is reproducible end to end through the included tests, benchmark scripts and web studios. The main remaining step is to tighten the evaluation, mainly the information-access and suite-selection points in Section 11, before drawing broader claims.
+    </p>
+
+    <!-- Section 14 -->
+    <h2>14. Reproduction Guide</h2>
+    <ul>
+      <li><strong>Launch the studios:</strong> <code>python server.py --port 8080</code>, then open <code>/</code> (arena) and <code>/empirical</code> (benchmarks).</li>
+      <li><strong>Run a benchmark:</strong> <code>python main.py --map miami --trials 50</code>, or add <code>--player SafetyGraph</code> for the other adversary.</li>
+      <li><strong>Run the tests:</strong> <code>python -m unittest discover -s tests</code>.</li>
+      <li><strong>Retrain the Q-tables:</strong> <code>python train_rl_agent.py --episodes 300</code>.</li>
+      <li><strong>Repository:</strong> <code>github.com/Prats1729/adaptive-npc-ai-FSM</code></li>
+    </ul>
+
+    <!-- References -->
+    <h2>References</h2>
+    <ol style="font-size: 13.5px; line-height: 1.6;">
+      <li>K. Xu and C. Verbrugge, "Generic Guard AI in Stealth Game with Composite Potential Fields," in <em>Proc. 21st AAAI Conf. on Artificial Intelligence and Interactive Digital Entertainment (AIIDE)</em>, 2025. arXiv:2508.18527.</li>
+      <li>A. Al Enezi and C. Verbrugge, "Dynamic Guard Patrol in Stealth Games," in <em>Proc. 16th AIIDE</em>, 2020.</li>
+      <li>A. Al Enezi and C. Verbrugge, "Skeleton-Based Multi-Agent Opponent Search," in <em>IEEE Conf. on Games (CoG)</em>, 2021.</li>
+      <li>O. Khatib, "Real-Time Obstacle Avoidance for Manipulators and Mobile Robots," <em>Int. J. Robotics Research</em>, vol. 5, no. 1, pp. 90–98, 1986.</li>
+      <li>S. Li, H. Jiang, Y. Liu, J. Zhang, X. Xu and D. Liu, "Generative Subgoal Oriented Multi-Agent Reinforcement Learning Through Potential Field," <em>Neural Networks</em>, vol. 179, p. 106552, 2024.</li>
+      <li>D. Isla, "Third Eye Crime: Building a Stealth Game Around Occupancy Maps," in <em>Proc. 9th AIIDE</em>, 2013.</li>
+      <li>S. Hladky and V. Bulitko, "An Evaluation of Models for Predicting Opponent Positions in First-Person Shooter Video Games," in <em>IEEE Symp. on Computational Intelligence and Games (CIG)</em>, pp. 39–46, 2008.</li>
+      <li>R. S. Sutton and A. G. Barto, <em>Reinforcement Learning: An Introduction</em>, 2nd ed., MIT Press, 2018.</li>
+      <li>M. Tan, "Multi-Agent Reinforcement Learning: Independent vs. Cooperative Agents," in <em>Proc. 10th ICML</em>, pp. 330–337, 1993.</li>
+      <li>C. B. Browne et al., "A Survey of Monte Carlo Tree Search Methods," <em>IEEE Trans. Computational Intelligence and AI in Games</em>, vol. 4, no. 1, pp. 1–43, 2012.</li>
+      <li>P. Spronck, I. Sprinkhuizen-Kuyper and E. Postma, "Adaptive Game AI with Dynamic Scripting," <em>Machine Learning</em>, vol. 63, no. 3, pp. 217–248, 2006.</li>
+      <li>G. Britton, "Decision-Making Decisions: Artificial Intelligence in Computer Games," academic research review, 2022.</li>
+    </ol>
+
+  </div>
+
+  <script>
+    function navigateStudio(destination, event) {
+      if (event) event.preventDefault();
+      const isHttp = window.location.protocol.startsWith('http');
+      const isInsideDocs = window.location.pathname.replace(/\\/g, '/').toLowerCase().includes('/docs/');
+
+      if (destination === 'arena') {
+        if (isHttp) {
+          window.location.href = '/ui/index.html';
+        } else {
+          window.location.href = isInsideDocs ? '../ui/index.html' : './index.html';
+        }
+      } else if (destination === 'empirical') {
+        if (isHttp) {
+          window.location.href = '/ui/empirical_results.html';
+        } else {
+          window.location.href = isInsideDocs ? '../ui/empirical_results.html' : './empirical_results.html';
+        }
+      }
+    }
+
+    // Auto-update hrefs on page load for middle-click and right-click
+    document.addEventListener('DOMContentLoaded', function() {
+      const isHttp = window.location.protocol.startsWith('http');
+      const isInsideDocs = window.location.pathname.replace(/\\/g, '/').toLowerCase().includes('/docs/');
+      const arena = document.getElementById('nav-arena');
+      const empirical = document.getElementById('nav-empirical');
+
+      if (arena) {
+        arena.href = isHttp ? '/ui/index.html' : (isInsideDocs ? '../ui/index.html' : './index.html');
+      }
+      if (empirical) {
+        empirical.href = isHttp ? '/ui/empirical_results.html' : (isInsideDocs ? '../ui/empirical_results.html' : './empirical_results.html');
+      }
+    });
+  </script>
+</body>
+</html>

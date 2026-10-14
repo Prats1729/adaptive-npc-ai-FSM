@@ -38,15 +38,16 @@ class StalenessFSMGuard:
         for cell in self.env.walkable_cells:
             self.staleness_map[cell] += 1
             
-        # Reset staleness for cells visited or directly visible to the guard
-        self.staleness_map[guard_pos] = 0
-        nbrs_near = self.env.get_neighbors(guard_pos[0], guard_pos[1])
-        for n in nbrs_near:
-            self.staleness_map[n] = 0
+        # Reset staleness for cells visited or directly visible to all team guards
+        guards_list = all_guards if all_guards else [guard_pos]
+        for g in guards_list:
+            self.staleness_map[g] = 0
+            for n in self.env.get_neighbors(g[0], g[1]):
+                self.staleness_map[n] = 0
 
         can_see_player = self.env.has_line_of_sight(guard_pos, player_pos, view_range)
 
-        # State Transitions
+        # State Transitions (calibrated for dt = 0.5s per tick: 2s = 4 ticks, 3s = 6 ticks, 5s = 10 ticks)
         if can_see_player:
             self.state = "CHASE"
             self.last_known_player_pos = player_pos
@@ -55,17 +56,17 @@ class StalenessFSMGuard:
         else:
             if self.state == "CHASE":
                 self.lose_sight_timer += 1
-                if self.lose_sight_timer >= 2:  # T Lose Sight = 2s
+                if self.lose_sight_timer >= 4:  # T Lose Sight = 2s (4 ticks at 0.5s/tick)
                     self.state = "INVESTIGATE"
                     self.state_timer = 0
             elif self.state == "INVESTIGATE":
                 self.state_timer += 1
-                if self.state_timer >= 3:  # T Investigate = 3s
+                if self.state_timer >= 6:  # T Investigate = 3s (6 ticks)
                     self.state = "RETURN"
                     self.state_timer = 0
             elif self.state == "RETURN":
                 self.state_timer += 1
-                if self.state_timer >= 5 or guard_pos == self.spawn_pos:  # Return Max = 5s
+                if self.state_timer >= 10 or guard_pos == self.spawn_pos:  # Return Max = 5s (10 ticks)
                     self.state = "PATROL"
                     self.patrol_target = None
                     self.state_timer = 0
