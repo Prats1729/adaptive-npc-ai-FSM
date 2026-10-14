@@ -152,20 +152,23 @@ Rather than building an implementation first and collecting papers post-hoc, thi
 
 ---
 
-## 3. Direct Mapping: Research Papers to Project Deliverables
+## 3. Direct Mapping: Downloaded Research Papers to Project Deliverables
 
-| Paper # | Focus Area | Key Paper Reference | Project Artifact / Code File | Role in Project |
-| :---: | :--- | :--- | :--- | :--- |
-| **1** | Classical AI Plateau | Britton (2022) | [`scripts/stealth/guard_fsm.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_fsm.py) | Paper Baseline: 4-State Machine |
-| **2** | Spatial Belief Maps | Isla (AIIDE 2013) | [`scripts/stealth/grid_environment.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/grid_environment.py) | 2D Grid & Raycasting Environment |
-| **3** | Patrol Coverage | Al Enezi & Verbrugge (AIIDE 2020) | [`scripts/stealth/guard_staleness.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_staleness.py) | Paper Baseline: Staleness FSM |
-| **4** | Topological Sweeps | Al Enezi & Verbrugge (IEEE CoG 2021) | [`scripts/stealth/guard_cpf.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_cpf.py) | Connectivity Field $N(n)$ |
-| **5** | APF Foundations | Khatib (IJRR 1986) | [`scripts/stealth/guard_cpf.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_cpf.py) | Potential Gradient Mathematics |
-| **6** | Multi-Agent APF | Li, Wang & Liu (Neural Networks 2024)| [`scripts/stealth/guard_cpf.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_cpf.py) | Multi-Objective Spatial Fields |
-| **7** | **CORE BASE PAPER** | **Xu & Verbrugge (AIIDE 2025)** | [`scripts/stealth/guard_cpf.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_cpf.py) | **Replicated Base Paper Benchmark** |
-| **8** | Kinematic Lookahead | Hladky & Bulitko (IEEE CIG 2008) | [`scripts/stealth/guard_pipf.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_pipf.py) | **Novel Model 1: PI-PF** |
-| **9** | Multi-Agent RL | Sutton & Barto (2018) / Tan (1993) | [`scripts/stealth/guard_rl.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_rl.py) | **Novel Model 2: MARL-Q** |
-| **10** | Tree Search Lookahead | Browne et al. (IEEE TCIAIG 2012) | [`scripts/stealth/guard_mcts.py`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/scripts/stealth/guard_mcts.py) | **Novel Model 3: APF-MCTS** |
+All 11 full-text research papers are stored and indexed directly inside the [`research papers/`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/) directory:
+
+| Paper # | Local PDF File in `research papers/` | Size | Focus Area | Role in Project |
+| :---: | :--- | :---: | :--- | :--- |
+| **01** | [`01 - Decision-Making Decisions in Computer Games (Britton 2022).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/01%20-%20Decision-Making%20Decisions%20in%20Computer%20Games%20(Britton%202022).pdf) | 625 KB | Classical AI Plateau | Motivation for continuous fields over FSM |
+| **02** | [`02 - Third Eye Crime - Building a Stealth Game Around Occupancy Maps (Isla 2013).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/02%20-%20Third%20Eye%20Crime%20-%20Building%20a%20Stealth%20Game%20Around%20Occupancy%20Maps%20(Isla%202013).pdf) | 215 KB | Spatial Belief Maps | 2D Grid & Raycasting Environment |
+| **03** | [`03 - Dynamic Guard Patrol in Stealth Games (Al Enezi & Verbrugge 2020).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/03%20-%20Dynamic%20Guard%20Patrol%20in%20Stealth%20Games%20(Al%20Enezi%20%26%20Verbrugge%202020).pdf) | 11.5 MB | Patrol Coverage | Paper Baseline: Staleness FSM |
+| **04** | [`04 - Adaptive Game AI with Dynamic Scripting (Spronck et al 2004).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/04%20-%20Adaptive%20Game%20AI%20with%20Dynamic%20Scripting%20(Spronck%20et%20al%202004).pdf) | 710 KB | Adaptive NPCs | Failure of static scripts against human players |
+| **05** | [`05 - Real-Time Obstacle Avoidance for Mobile Robots (Khatib 1986).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/05%20-%20Real-Time%20Obstacle%20Avoidance%20for%20Mobile%20Robots%20(Khatib%201986).pdf) | 1.18 MB | APF Foundations | Potential Gradient Math & Local Minima |
+| **06** | [`06 - Game AI Revisited (Yannakakis 2012).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/06%20-%20Game%20AI%20Revisited%20(Yannakakis%202012).pdf) | 759 KB | AI Taxonomy | Evaluation of NPC intelligence in modern games |
+| **07** | [`07 - Generic Guard AI in Stealth Game with Composite Potential Fields (Xu & Verbrugge 2025) [BASE PAPER].pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/07%20-%20Generic%20Guard%20AI%20in%20Stealth%20Game%20with%20Composite%20Potential%20Fields%20(Xu%20%26%20Verbrugge%202025)%20[BASE%20PAPER].pdf) | 798 KB | **CORE BASE PAPER** | **Replicated Base Paper Benchmark (CPF)** |
+| **08** | [`08 - Multi-Agent Reinforcement Learning - Independent vs Cooperative Agents (Tan 1993).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/08%20-%20Multi-Agent%20Reinforcement%20Learning%20-%20Independent%20vs%20Cooperative%20Agents%20(Tan%201993).pdf) | 171 KB | Multi-Agent RL | Cooperative Q-Learning without heuristics |
+| **09** | [`09 - Reinforcement Learning - An Introduction (Sutton & Barto 2018).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/09%20-%20Reinforcement%20Learning%20-%20An%20Introduction%20(Sutton%20%26%20Barto%202018).pdf) | 19.3 MB | RL Foundations | Bellman TD Optimality Math for MARL-Q |
+| **10** | [`10 - A Survey of Monte Carlo Tree Search Methods (Browne et al 2012).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/10%20-%20A%20Survey%20of%20Monte%20Carlo%20Tree%20Search%20Methods%20(Browne%20et%20al%202012).pdf) | 2.66 MB | Tree Search Lookahead | APF-MCTS with UCB1 for Local Minima Pruning |
+| **11** | [`11 - A Survey of Behavior Trees in Robotics and AI (Colledanchise & Ogren 2018).pdf`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/research%20papers/11%20-%20A%20Survey%20of%20Behavior%20Trees%20in%20Robotics%20and%20AI%20(Colledanchise%20%26%20Ogren%202018).pdf) | 1.40 MB | Hybrid Architectures | Behavior Trees & FSM Comparison |
 
 ---
 
