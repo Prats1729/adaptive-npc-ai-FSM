@@ -352,33 +352,26 @@ Every guard model implements the standardized interface:
   2. **Mean Capture Time ($CT \pm \sigma$):** Average trial duration in seconds across all 500 trials including 60.0s timeouts (mirroring the base paper's $\bar{T}$ metric).
   3. **Backtracking Frequency ($B \pm \sigma$):** Average number of times guards reverse direction within 2 consecutive steps (measuring patrol oscillation).
 
-### 9.2 Master Evaluation Matrix (Suite A vs. Base Paper Table 3, N=500)
+### 9.2 Master Evaluation Table (Suite A vs. Base Paper Table 3)
 
-#### Miami (26×21 Layout) — Empirical Verification Matrix
-
-| Guard Model | Classification | Empirical $CR$ | Paper Table 3 $CR$ | Empirical Mean $CT$ (s) | Paper Table 3 $CT$ | Delta ($|\Delta CT|$) | Backtracks ($B$) | Empirical Takeaway |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Cheat** | Paper Model | **0.91** | 0.95 | $29.05 \pm 12.11\text{s}$ | $20.25 \pm 14.66\text{s}$ | $|\Delta| = 8.80\text{s}$ | **0.00** | Theoretical Optimal Bound • Omniscient shortest path |
-| **CPF** | Paper Model | **0.78** | **0.80** | $40.26 \pm 15.81\text{s}$ | $31.70 \pm 19.72\text{s}$ | $|\Delta| = 8.56\text{s}$ | **0.18** | Base Paper Reproduction • Spatial Information + Confidence Fields |
-| **Staleness** | Paper Model | **0.19** | 0.56 | $54.43 \pm 12.48\text{s}$ | $42.65 \pm 18.90\text{s}$ | $|\Delta| = 11.78\text{s}$ | **5.36** | Paper Baseline • Explores stale footprint nodes |
-| **FSM** | Paper Model | **0.08** | 0.12 | $58.47 \pm 6.31\text{s}$ | $55.10 \pm 14.68\text{s}$ | $|\Delta| = 3.37\text{s}$ | **3.75** | Classical Baseline • High Reactive Pursuit Lag & corridor oscillation |
-| **RandomWalk** | Paper Model | **0.00** | 0.04 | $59.99 \pm 0.22\text{s}$ | $58.18 \pm 9.48\text{s}$ | **$|\Delta| = 1.81\text{s} \checkmark$** | **50.00** | Paper Baseline • Brownian motion oscillation |
-| **PI-PF** | **Novel Model** | **0.89** | — | $34.50 \pm 14.10\text{s}$ | — | **$+5.76\text{s faster}$** | **0.00** | Predictive Intercept • Forward velocity eliminates reactive lag |
-| **RL-Q** | **Novel Model** | **0.97** | — | **$25.37 \pm 9.74\text{s}$** | — | **$+14.89\text{s faster}$** | **0.00** | ★ **SOTA Multi-Agent Pincer** • Cut off escape corridors (0.00 backtracks) |
-| **APF-MCTS** | **Novel Model** | **0.95** | — | **$25.50 \pm 10.52\text{s}$** | — | **$+14.76\text{s faster}$** | **0.00** | ★ **Fastest SOTA** • H=3 Tree Lookahead prunes dead-end traps |
-
-#### Test Maze (20×20 Layout) — Empirical Verification Matrix
-
-| Guard Model | Classification | Empirical $CR$ | Paper Table 3 $CR$ | Empirical Mean $CT$ (s) | Paper Table 3 $CT$ | Delta ($|\Delta CT|$) | Backtracks ($B$) | Empirical Takeaway |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Cheat** | Paper Model | **0.78** | 0.95 | $35.29 \pm 15.94\text{s}$ | $20.25 \pm 14.66\text{s}$ | $|\Delta| = 15.04\text{s}$ | **0.00** | Theoretical Optimal Bound • Omniscient shortest path |
-| **CPF** | Paper Model | **0.30** | **0.52** | $54.49 \pm 10.59\text{s}$ | $41.20 \pm 11.40\text{s}$ | $|\Delta| = 13.29\text{s}$ | **0.22** | Base Paper Reproduction • Potential field traps in loops |
-| **Staleness** | Paper Model | **0.25** | 0.38 | $51.64 \pm 15.23\text{s}$ | $42.65 \pm 18.90\text{s}$ | $|\Delta| = 8.99\text{s}$ | **4.86** | Paper Baseline • Explores stale footprint nodes (B matches 4.82) |
-| **FSM** | Paper Model | **0.01** | 0.08 | $59.81 \pm 2.54\text{s}$ | $58.00 \pm 8.00\text{s}$ | **$|\Delta| = 1.81\text{s} \checkmark$** | **11.01** | Classical Baseline • Severe corridor oscillation (B matches 11.24) |
-| **RandomWalk** | Paper Model | **0.00** | 0.02 | $60.00 \pm 0.00\text{s}$ | $58.18 \pm 9.48\text{s}$ | **$|\Delta| = 1.82\text{s} \checkmark$** | **74.62** | Paper Baseline • Brownian motion in maze (B matches 76.12) |
-| **PI-PF** | **Novel Model** | **0.39** | — | $52.89 \pm 11.26\text{s}$ | — | **$+1.60\text{s faster}$** | **0.30** | Predictive Intercept • Forward velocity in corridors |
-| **RL-Q** | **Novel Model** | **0.70** | — | **$37.66 \pm 16.57\text{s}$** | — | **$+16.83\text{s faster}$** | **0.00** | ★ **SOTA Multi-Agent Pincer** • 2.3× CPF Capture Rate |
-| **APF-MCTS** | **Novel Model** | **0.71** | — | **$37.49 \pm 16.63\text{s}$** | — | **$+17.00\text{s faster}$** | **0.00** | ★ **Fastest SOTA** • 2.3× CPF Capture Rate (H=3 Lookahead) |
+| Environment | Guard Model | Model Classification | Empirical $CR$ | Base Paper $CR$ | Empirical Mean $CT$ | Base Paper $CT$ | Delta vs Paper | Backtracks ($B$) | Paper $B$ |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Miami** | **Cheat** | Omniscient Bound | **0.91** | **0.95** | $29.05 \pm 12.11\text{s}$ | $20.25 \pm 14.66\text{s}$ | $+8.80\text{s}$ | $0.00 \pm 0.00$ | $0.00$ |
+| ($26 \times 21$) | **CPF** | Base Paper Reproduction | **0.78** | **0.80** | $40.26 \pm 15.81\text{s}$ | $31.70 \pm 19.72\text{s}$ | $+8.56\text{s}$ | $0.18 \pm 0.38$ | $0.36$ |
+| | **Staleness** | Paper Baseline (Al Enezi) | **0.19** | **0.56** | $54.43 \pm 12.48\text{s}$ | $42.65 \pm 18.90\text{s}$ | $+11.78\text{s}$ | $5.36 \pm 7.75$ | $3.66$ |
+| | **FSM** | Paper Classical Baseline | **0.08** | **0.12** | $58.47 \pm 6.31\text{s}$ | $55.10 \pm 14.68\text{s}$ | **$+3.37\text{s}$** | $3.75 \pm 2.90$ | $3.42$ |
+| | **RandomWalk** | Paper Random Baseline | **0.00** | **0.04** | $59.99 \pm 0.22\text{s}$ | $58.18 \pm 9.48\text{s}$ | **$+1.81\text{s}$** | $50.00 \pm 6.68$ | $51.34$ |
+| | **PI-PF** | **Novel 1 (Predictive Intercept)** | **0.89** | *N/A* | $34.50 \pm 14.10\text{s}$ | — | — | **$0.00 \pm 0.00$** | — |
+| | **RL-Q** | **Novel 2 (Q-Learning RL)** | **0.97** | *N/A* | **$25.37 \pm 9.74\text{s}$** | — | **$-14.89\text{s vs CPF}$** | **$0.00 \pm 0.00$** | — |
+| | **APF-MCTS** | **Novel 3 (MCTS Lookahead)** | **0.95** | *N/A* | **$25.50 \pm 10.52\text{s}$** | — | **$-14.76\text{s vs CPF}$** | **$0.00 \pm 0.00$** | — |
+| **Test Maze** | **Cheat** | Omniscient Bound | **0.78** | **0.95** | $35.29 \pm 15.94\text{s}$ | $20.25 \pm 14.66\text{s}$ | $+15.04\text{s}$ | $0.00 \pm 0.06$ | $0.00$ |
+| ($20 \times 20$) | **CPF** | Base Paper Reproduction | **0.30** | **0.52** | $54.49 \pm 10.59\text{s}$ | $41.20 \pm 11.40\text{s}$ | $+13.29\text{s}$ | $0.22 \pm 0.49$ | $2.18$ |
+| | **Staleness** | Paper Baseline (Al Enezi) | **0.25** | **0.38** | $51.64 \pm 15.23\text{s}$ | $42.65 \pm 18.90\text{s}$ | $+8.99\text{s}$ | $4.86 \pm 2.99$ | $4.82$ |
+| | **FSM** | Paper Classical Baseline | **0.01** | **0.08** | $59.81 \pm 2.54\text{s}$ | $58.00 \pm 8.00\text{s}$ | **$+1.81\text{s}$** | $11.01 \pm 2.43$ | $11.24$ |
+| | **RandomWalk** | Paper Random Baseline | **0.00** | **0.02** | $60.00 \pm 0.00\text{s}$ | $58.18 \pm 9.48\text{s}$ | **$+1.82\text{s}$** | $74.62 \pm 8.00$ | $76.12$ |
+| | **PI-PF** | **Novel 1 (Predictive Intercept)** | **0.39** | *N/A* | $52.89 \pm 11.26\text{s}$ | — | — | **$0.30 \pm 0.55$** | — |
+| | **RL-Q** | **Novel 2 (Q-Learning RL)** | **0.70** | *N/A* | **$37.66 \pm 16.57\text{s}$** | — | **$-16.83\text{s vs CPF}$** | **$0.00 \pm 0.00$** | — |
+| | **APF-MCTS** | **Novel 3 (MCTS Lookahead)** | **0.71** | *N/A* | **$37.49 \pm 16.63\text{s}$** | — | **$-17.00\text{s vs CPF}$** | **$0.00 \pm 0.00$** | — |
 
 ---
 
