@@ -6,7 +6,3 @@
 # Python cache ignores
 __pycache__/
 *.pyc
-
-RESEARCH_GAP_AND_ROADMAP.md
-Summary.md
-LITERATURE_REVIEW.md

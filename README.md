@@ -121,11 +121,8 @@ python train_rl_agent.py --episodes 300
 
 ```text
 adaptive-npc-ai/
-├── README.md                      # Primary project overview & documentation
-├── AGENTS.md                      # Research instructions & specifications
-├── PROJECT_REPORT.md              # Comprehensive scientific research report
-├── DECISION_LOG.md                # Engineering decisions, math proofs & empirical logs
-├── RESEARCH_GAP_AND_ROADMAP.md    # Theoretical foundations & literature review
+├── README.md                      # Primary project overview & quickstart guide
+├── PROJECT_REPORT.md              # Authoritative, comprehensive academic & engineering report
 ├── main.py                        # Unified CLI and UI entry point
 ├── server.py                      # Multi-threaded zero-dependency API & asset server
 ├── train_rl_agent.py              # Offline reinforcement learning trainer
