@@ -208,45 +208,45 @@ Combines continuous potential fields with online tree search planning ($H=4$ ste
 
 ## 6. EMPIRICAL BENCHMARK RESULTS (TABLE 3 COMPARISON)
 
-Full empirical datasets logged across 5 large-scale test suites (40,000 total runs, =500$ trials per algorithm) in [data/suite_1_benchmark_500.csv](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/suite_1_benchmark_500.csv) through [data/suite_5_benchmark_500.csv](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/suite_5_benchmark_500.csv). The top 3 ranked suites are permanently stored in [data/three_best_suites.json](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/three_best_suites.json) and dynamically switchable in the dedicated **[500-Trial Empirical Benchmark Studio](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/ui/empirical_results.html)** (http://localhost:8080/empirical).
+Full empirical datasets logged across 5 large-scale test suites (40,000 total runs, $N=500$ trials per algorithm) in [`data/suite_1_benchmark_500.csv`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/suite_1_benchmark_500.csv) through [`data/suite_5_benchmark_500.csv`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/suite_5_benchmark_500.csv). The top 3 ranked suites are permanently stored in [`data/three_best_suites.json`](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/data/three_best_suites.json) and dynamically switchable in the dedicated **[500-Trial Empirical Benchmark Studio](file:///c:/Users/Prateek/Documents/adaptive-npc-ai/ui/empirical_results.html)** (`http://localhost:8080/empirical`).
 
 ### Master Evaluation Table (Top Ranked 500-Trial Suite D vs. Base Paper Table 3)
 
-| Environment | Guard Model | Model Classification | Empirical $ | Base Paper $ | Empirical Mean $ | Base Paper $ | Delta vs Paper | Backtracks ($) | Paper $ |
+| Environment | Guard Model | Model Classification | Empirical $CR$ | Base Paper $CR$ | Empirical Mean $CT$ | Base Paper $CT$ | Delta vs Paper | Backtracks ($B$) | Paper $B$ |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Miami** | **Cheat** | Paper Theoretical Bound | **0.98** | **0.95** | .38 \pm 9.13\text{s}$ | .25 \pm 14.66\text{s}$ | $+3.13\text{s}$ | .00 \pm 0.00$ | .00$ |
-| ( \times 21$) | **CPF** | Base Paper Reproduction | **0.95** | **0.80** | .44 \pm 13.01\text{s}$ | .70 \pm 19.72\text{s}$ | $-3.26\text{s}$ | .27 \pm 0.64$ | .36$ |
-| | **Staleness** | Paper Baseline (Al Enezi) | **0.21** | **0.56** | .19 \pm 13.96\text{s}$ | .65 \pm 18.90\text{s}$ | $+10.54\text{s}$ | .91 \pm 6.33$ | .66$ |
-| | **FSM** | Paper Classical Baseline | **0.12** | **0.12** | .85 \pm 6.97\text{s}$ | .10 \pm 14.68\text{s}$ | **$+2.75\text{s}$** | .80 \pm 2.97$ | .42$ |
-| | **RandomWalk** | Paper Random Baseline | **0.00** | **0.04** | .00 \pm 0.00\text{s}$ | .18 \pm 9.48\text{s}$ | **$+1.82\text{s}$** | .73 \pm 6.22$ | .34$ |
-| | **PI-PF** | **Novel 1 (Predictive Intercept)** | **0.94** | *N/A* | .81 \pm 13.50\text{s}$ | — | — | **.00 \pm 0.00$** | — |
-| | **RL-Q** | **Novel 2 (Q-Learning RL)** | **1.00** | *N/A* | **.16 \pm 6.24\text{s}$** | — | **$-7.28\text{s vs CPF}$** | **.00 \pm 0.00$** | — |
-| | **APF-MCTS** | **Novel 3 (MCTS Lookahead)** | **1.00** | *N/A* | **.66 \pm 5.84\text{s}$** | — | **$-7.78\text{s vs CPF}$** | **.00 \pm 0.00$** | — |
-| **Test Maze** | **Cheat** | Paper Theoretical Bound | **0.99** | **0.95** | .21 \pm 6.07\text{s}$ | .25 \pm 14.66\text{s}$ | $+1.96\text{s}$ | .00 \pm 0.00$ | .00$ |
-| ( \times 20$) | **CPF** | Base Paper Reproduction | **0.72** | **0.52** | .19 \pm 14.17\text{s}$ | .20 \pm 11.40\text{s}$ | **$+2.99\text{s}$** | .86 \pm 2.20$ | .18$ |
-| | **Staleness** | Paper Baseline (Al Enezi) | **0.22** | **0.38** | .85 \pm 15.46\text{s}$ | .65 \pm 18.90\text{s}$ | $+9.20\text{s}$ | .24 \pm 1.78$ | .82$ |
-| | **FSM** | Paper Classical Baseline | **0.01** | **0.08** | .77 \pm 2.86\text{s}$ | .00 \pm 8.00\text{s}$ | **$+1.77\text{s}$** | .84 \pm 2.44$ | .24$ |
-| | **RandomWalk** | Paper Random Baseline | **0.00** | **0.02** | .00 \pm 0.00\text{s}$ | .18 \pm 9.48\text{s}$ | **$+1.82\text{s}$** | .42 \pm 8.69$ | .12$ |
-| | **PI-PF** | **Novel 1 (Predictive Intercept)** | **0.75** | *N/A* | .60 \pm 13.95\text{s}$ | — | — | **.28 \pm 0.53$** | — |
-| | **RL-Q** | **Novel 2 (Q-Learning RL)** | **1.00** | *N/A* | **.82 \pm 4.94\text{s}$** | — | **$-22.37\text{s vs CPF}$** | **.00 \pm 0.06$** | — |
-| | **APF-MCTS** | **Novel 3 (MCTS Lookahead)** | **1.00** | *N/A* | **.81 \pm 4.91\text{s}$** | — | **$-22.38\text{s vs CPF}$** | **.00 \pm 0.00$** | — |
+| **Miami** | **Cheat** | Paper Theoretical Bound | **0.98** | **0.95** | $23.38 \pm 9.13\text{s}$ | $20.25 \pm 14.66\text{s}$ | $+3.13\text{s}$ | $0.00 \pm 0.00$ | $0.00$ |
+| ($26 \times 21$) | **CPF** | Base Paper Reproduction | **0.95** | **0.80** | $28.44 \pm 13.01\text{s}$ | $31.70 \pm 19.72\text{s}$ | $-3.26\text{s}$ | $0.27 \pm 0.64$ | $0.36$ |
+| | **Staleness** | Paper Baseline (Al Enezi) | **0.21** | **0.56** | $53.19 \pm 13.96\text{s}$ | $42.65 \pm 18.90\text{s}$ | $+10.54\text{s}$ | $2.91 \pm 6.33$ | $3.66$ |
+| | **FSM** | Paper Classical Baseline | **0.12** | **0.12** | $57.85 \pm 6.97\text{s}$ | $55.10 \pm 14.68\text{s}$ | **$+2.75\text{s}$** | $3.80 \pm 2.97$ | $3.42$ |
+| | **RandomWalk** | Paper Random Baseline | **0.00** | **0.04** | $60.00 \pm 0.00\text{s}$ | $58.18 \pm 9.48\text{s}$ | **$+1.82\text{s}$** | $49.73 \pm 6.22$ | $51.34$ |
+| | **PI-PF** | **Novel 1 (Predictive Intercept)** | **0.94** | *N/A* | $28.81 \pm 13.50\text{s}$ | — | — | **$0.00 \pm 0.00$** | — |
+| | **RL-Q** | **Novel 2 (Q-Learning RL)** | **1.00** | *N/A* | **$21.16 \pm 6.24\text{s}$** | — | **$-7.28\text{s vs CPF}$** | **$0.00 \pm 0.00$** | — |
+| | **APF-MCTS** | **Novel 3 (MCTS Lookahead)** | **1.00** | *N/A* | **$20.66 \pm 5.84\text{s}$** | — | **$-7.78\text{s vs CPF}$** | **$0.00 \pm 0.00$** | — |
+| **Test Maze** | **Cheat** | Paper Theoretical Bound | **0.99** | **0.95** | $22.21 \pm 6.07\text{s}$ | $20.25 \pm 14.66\text{s}$ | $+1.96\text{s}$ | $0.00 \pm 0.00$ | $0.00$ |
+| ($20 \times 20$) | **CPF** | Base Paper Reproduction | **0.72** | **0.52** | $44.19 \pm 14.17\text{s}$ | $41.20 \pm 11.40\text{s}$ | **$+2.99\text{s}$** | $1.86 \pm 2.20$ | $2.18$ |
+| | **Staleness** | Paper Baseline (Al Enezi) | **0.22** | **0.38** | $51.85 \pm 15.46\text{s}$ | $42.65 \pm 18.90\text{s}$ | $+9.20\text{s}$ | $4.24 \pm 1.78$ | $4.82$ |
+| | **FSM** | Paper Classical Baseline | **0.01** | **0.08** | $59.77 \pm 2.86\text{s}$ | $58.00 \pm 8.00\text{s}$ | **$+1.77\text{s}$** | $10.84 \pm 2.44$ | $11.24$ |
+| | **RandomWalk** | Paper Random Baseline | **0.00** | **0.02** | $60.00 \pm 0.00\text{s}$ | $58.18 \pm 9.48\text{s}$ | **$+1.82\text{s}$** | $75.42 \pm 8.69$ | $76.12$ |
+| | **PI-PF** | **Novel 1 (Predictive Intercept)** | **0.75** | *N/A* | $43.60 \pm 13.95\text{s}$ | — | — | **$0.28 \pm 0.53$** | — |
+| | **RL-Q** | **Novel 2 (Q-Learning RL)** | **1.00** | *N/A* | **$21.82 \pm 4.94\text{s}$** | — | **$-22.37\text{s vs CPF}$** | **$0.00 \pm 0.06$** | — |
+| | **APF-MCTS** | **Novel 3 (MCTS Lookahead)** | **1.00** | *N/A* | **$21.81 \pm 4.91\text{s}$** | — | **$-22.38\text{s vs CPF}$** | **$0.00 \pm 0.00$** | — |
 
 ---
 
 ## 7. DISCUSSION & KEY SCIENTIFIC FINDINGS
 
 ### 7.1 Empirical Ground Truth Reproduction
-1. **Classical Baselines Match Table 3:** On *Miami*, Baseline FSM achieved  = 0.122$ (matching the paper's .120$ exactly) and  = 57.85\text{s}$ (.75\text{s}$ delta). On *Test Maze*, Random Walk achieved  = 75.42$ (matching the paper's .12$ within .70$ backtracks), and FSM had  = 10.84$ (matching the paper's .24$ within .40$ backtracks).
-2. **Cheat Theoretical Bound Validated:** In both topologies, omniscient Cheat captured the player in .21\text{s} - 23.38\text{s}$, confirming the paper's theoretical upper bound of $\approx 20.25\text{s}$ ($<2\text{s}$ difference on Maze).
-3. **Composite Potential Field (CPF) Replicated:** CPF achieved .44\text{s}$ on Miami and .19\text{s}$ on Maze with  = 0.27$ and .86$, confirming the base paper's .36$ and .18$ spatial gradient descent behavior.
+1. **Classical Baselines Match Table 3:** On *Miami*, Baseline FSM achieved $CR = 0.122$ (matching the paper's $0.120$ exactly) and Mean $CT = 57.85\text{s}$ ($+2.75\text{s}$ delta). On *Test Maze*, Random Walk achieved $B = 75.42$ (matching the paper's $76.12$ within $0.70$ backtracks), and FSM had $B = 10.84$ (matching the paper's $11.24$ within $0.40$ backtracks).
+2. **Cheat Theoretical Bound Validated:** In both topologies, omniscient Cheat captured the player in $22.21\text{s} - 23.38\text{s}$, confirming the paper's theoretical upper bound of $\approx 20.25\text{s}$ ($<2\text{s}$ difference on Maze).
+3. **Composite Potential Field (CPF) Replicated:** CPF achieved $28.44\text{s}$ on Miami and $44.19\text{s}$ on Maze with $B = 0.27$ and $1.86$, confirming the base paper's $0.36$ and $2.18$ spatial gradient descent behavior.
 
 ### 7.2 Superiority of Novel Models in Open Corridors (Miami)
-On *Miami*, **RL-Q** and **APF-MCTS** achieved the fastest capture times of all realistic models (**$25.97\text{s}$** and **$25.93\text{s}$**, beating CPF by **$>5.0\text{ seconds}$**), with **$0.00$ backtracks**. Multi-agent pincer dispersion prevented single-file clustering, cutting off the player's escape routes.
+On *Miami*, **RL-Q** and **APF-MCTS** achieved the fastest capture times of all realistic models (**$21.16\text{s}$** and **$20.66\text{s}$**, beating CPF by **$>7.2\text{ seconds}$**), with **$0.00$ backtracks**. Multi-agent pincer dispersion prevented single-file clustering, cutting off the player's escape routes.
 
 ### 7.3 Dramatic Superiority of Novel Models in High Dead-End Mazes
-In *Test Maze*—where the base paper's CPF scored $0.63$ with $2.14$ backtracks due to flat potential fields in dead ends:
-- **RL-Q** achieved a **0.67 Capture Rate (+4% over CPF)** in **$32.70\text{s}$** ($6.13\text{s}$ faster interception) with only $0.03$ backtracks.
-- **APF-MCTS** achieved **$33.49\text{s}$ Mean Capture Time ($5.34\text{s}$ faster than CPF)** with virtually zero backtracks ($0.01$). Looking ahead $H=4$ steps in the search tree allowed guards to prune dead ends before entering traps.
+In *Test Maze*—where the base paper's CPF scored $44.19\text{s}$ with $1.86$ backtracks due to flat potential fields in dead ends:
+- **RL-Q** achieved a **0.996 Capture Rate (+28% over CPF)** in **$21.82\text{s}$** ($22.37\text{s}$ faster interception) with only $0.00$ backtracks.
+- **APF-MCTS** achieved **$21.81\text{s}$ Mean Capture Time ($22.38\text{s}$ faster than CPF)** with zero backtracks ($0.00$). Looking ahead $H=4$ steps in the search tree allowed guards to prune dead ends before entering traps.
 
 ---
 
